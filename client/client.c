@@ -8,9 +8,11 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
+#define BUFFSIZE 512
+
 int main()
 {
-    printf("Welcome to LSOccer Simulator's Client!");
+    printf("Welcome to LSOccer Simulator's Client!\n");
 
     int fd;
     struct sockaddr_un address;
@@ -27,7 +29,9 @@ int main()
         exit(1);
     }
 
-    //azioni client
+    char buffer[BUFFSIZE] = ""; 
+    int rdout = read(fd, buffer, BUFFSIZE);
+    printf("%s\n", buffer);
 
     close(fd);
 

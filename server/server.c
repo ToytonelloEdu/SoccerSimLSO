@@ -8,9 +8,11 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
+#define BUFFSIZE 512
+
 int main()
 {
-    printf("Welcome to LSOccer Simulator's Server!");
+    printf("Welcome to LSOccer Simulator's Server!\n");
 
     int fd1, new_socket;
     struct sockaddr_un address;
@@ -23,10 +25,13 @@ int main()
 
     listen(fd1, 5);
 
+    //char buffer[BUFFSIZE] = "";
+
     while((new_socket = accept(fd1, NULL, NULL)) > -1)
     {
-        //azioni del server
-        printf("Siamo gay");
+        char buffer[] = "Cirogay";
+        int wrout = write(new_socket, buffer, strlen(buffer));
+        printf("Messaggio mandato\n");
     }
 
     close (fd1);
