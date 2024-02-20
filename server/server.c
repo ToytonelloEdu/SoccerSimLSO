@@ -26,6 +26,7 @@ int main()
     while((new_socket = accept(fd1, NULL, NULL)) > -1)
     {
         //azioni del server
+        printf("Siamo gay");
     }
 
     close (fd1);
