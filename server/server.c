@@ -35,7 +35,7 @@ int main()
     }
 
     close (fd1);
-    unlink("/tmp/MySocket");
+    unlink("/tmp/mySocket");
 
     return 0;
 }
