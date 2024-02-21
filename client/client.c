@@ -36,7 +36,7 @@ int main()
 
     int n;
     
-    if(status = connect(sock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0);
+    if(status = connect(sock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
     {
         perror("client");
         exit(EXIT_FAILURE);
