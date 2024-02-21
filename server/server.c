@@ -32,6 +32,7 @@ int main()
         char buffer[] = "Cirogay";
         int wrout = write(new_socket, buffer, strlen(buffer));
         printf("Messaggio mandato\n");
+        close(new_socket);
     }
 
     close (fd1);
