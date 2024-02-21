@@ -1,6 +1,7 @@
 FROM alpine:latest
-RUN mkdir -p /app
-COPY server /app
+RUN apk add libc6-compat
 WORKDIR /app
-RUN chmod +x server
-CMD ["/app/server"] 
+COPY . /app
+CMD ["./server"] 
+
+EXPOSE 8080
