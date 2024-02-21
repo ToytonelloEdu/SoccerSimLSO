@@ -2,11 +2,16 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <time.h>
 #include <pthread.h>
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <asm-generic/socket.h>
 
 #define BUFFSIZE 512
 
@@ -14,26 +19,34 @@ int main()
 {
     printf("Welcome to LSOccer Simulator's Client!\n");
 
-    int fd;
-    struct sockaddr_un address;
+    int sock_fd, status;
+    struct sockaddr_in servaddr;
 
-    address.sun_family = AF_INET;
-    strcpy(address.sun_path, "127.0.0.1");
+    if((sock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        perror("Failed to create socket");
+        exit(EXIT_FAILURE);
+    }
 
-    fd = socket(PF_INET, SOCK_STREAM, 0);
+    memset(&servaddr, 0, sizeof(servaddr));
+
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    servaddr.sin_port = htons(12345);
+
+    int n;
     
-    int result = connect(fd, (struct sockaddr*)&address, sizeof(address));
-    if(result == -1)
+    if(status = connect(sock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0);
     {
         perror("client");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     char buffer[BUFFSIZE] = ""; 
-    int rdout = read(fd, buffer, BUFFSIZE);
+    int rdout = read(sock_fd, buffer, BUFFSIZE);
     printf("%s\n", buffer);
 
-    close(fd);
+    close(sock_fd);
 
     return 0;
 }

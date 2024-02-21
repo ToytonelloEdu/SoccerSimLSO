@@ -2,11 +2,16 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <time.h>
 #include <pthread.h>
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <asm-generic/socket.h>
 
 #define BUFFSIZE 512
 
@@ -14,20 +19,43 @@ int main()
 {
     printf("Welcome to LSOccer Simulator's Server!\n");
 
-    int fd1, new_socket;
-    struct sockaddr_un address;
+    int wsock_fd, new_socket;
+    int opt = 1;
+    struct sockaddr_in servaddr, cliaddr;
+    
+    if((wsock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        perror("Failed to create socket");
+        exit(EXIT_FAILURE);
+    }
+    if(setsockopt(wsock_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+    {
+        perror("setsockopt failed");
+        exit(EXIT_FAILURE);
+    }
 
-    address.sun_family = AF_INET;
-    strcpy(address.sun_path, "127.0.0.1");
+    memset(&servaddr, 0, sizeof(servaddr));
+    memset(&cliaddr, 0, sizeof(cliaddr));
 
-    fd1 = socket(PF_INET, SOCK_STREAM, 0);
-    bind(fd1, (struct sockaddr*)&address, sizeof(address));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+    servaddr.sin_port = htons(12345);
 
-    listen(fd1, 5);
+    if(bind(wsock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
+    {
+        perror("Bind failed");
+        exit(EXIT_FAILURE);
+    }
 
-    //char buffer[BUFFSIZE] = "";
+    if(listen(wsock_fd, 10) < 0)
+    {
+        perror("listen error");
+        exit(EXIT_FAILURE);
+    }
 
-    while((new_socket = accept(fd1, NULL, NULL)) > -1)
+    int addrlen = sizeof(cliaddr);
+
+    while((new_socket = accept(wsock_fd, (struct sockaddr*)&cliaddr, sizeof(cliaddr))) > -1)
     {
         char buffer[] = "Cirogay";
         int wrout = write(new_socket, buffer, strlen(buffer));
@@ -35,8 +63,7 @@ int main()
         close(new_socket);
     }
 
-    close (fd1);
-    unlink("127.0.0.1");
+    close (wsock_fd);
 
     return 0;
 }
