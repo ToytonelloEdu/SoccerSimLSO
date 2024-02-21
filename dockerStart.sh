@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker start -i SoccerSimContainerx
+docker start -i SoccerSimContainer

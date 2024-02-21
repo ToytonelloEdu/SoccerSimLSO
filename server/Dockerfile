@@ -4,4 +4,4 @@ WORKDIR /app
 COPY . /app
 CMD ["./server"] 
 
-EXPOSE 8080
+EXPOSE 12345
