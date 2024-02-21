@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run -it -p 8080:8080 --name SoccerSimContainer soccersimserver:0.1
+docker run -it -p 12345:12345 --name SoccerSimContainer soccersimserver:0.1
