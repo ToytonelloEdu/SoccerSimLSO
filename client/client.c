@@ -18,7 +18,7 @@ int main()
     struct sockaddr_un address;
 
     address.sun_family = AF_LOCAL;
-    strcpy(address.sun_path, "/tmp/mySocket");
+    strcpy(address.sun_path, "127.0.0.1");
 
     fd = socket(PF_LOCAL, SOCK_STREAM, 0);
     
