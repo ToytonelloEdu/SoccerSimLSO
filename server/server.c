@@ -55,7 +55,7 @@ int main()
 
     int addrlen = sizeof(cliaddr);
 
-    while((new_socket = accept(wsock_fd, (struct sockaddr*)&cliaddr, sizeof(cliaddr))) > -1)
+    while((new_socket = accept(wsock_fd, (struct sockaddr*)&cliaddr, (socklen_t*)&addrlen)) > -1)
     {
         char buffer[] = "Cirogay";
         int wrout = write(new_socket, buffer, strlen(buffer));
