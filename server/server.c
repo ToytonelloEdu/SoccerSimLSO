@@ -17,10 +17,10 @@ int main()
     int fd1, new_socket;
     struct sockaddr_un address;
 
-    address.sun_family = AF_LOCAL;
+    address.sun_family = AF_INET;
     strcpy(address.sun_path, "127.0.0.1");
 
-    fd1 = socket(PF_LOCAL, SOCK_STREAM, 0);
+    fd1 = socket(PF_INET, SOCK_STREAM, 0);
     bind(fd1, (struct sockaddr*)&address, sizeof(address));
 
     listen(fd1, 5);
