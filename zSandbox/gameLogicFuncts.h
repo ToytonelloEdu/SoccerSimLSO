@@ -15,9 +15,9 @@ void dribbling(struct referee* Ref, struct player* player);
 void goal(struct referee* Ref, struct player* player);
 void addShotFailed(struct stats* stats);
 void addDribbling(struct stats* stats);
-typedef int* ball;
+typedef int ball;
 
-    void wait(ball mutex)
+    void wait(ball* mutex)
     {
         while(*mutex <= 0);
         printf("%d\n", *mutex);
@@ -25,7 +25,7 @@ typedef int* ball;
         printf("%d\n", *mutex);
     }
 
-    void signal(ball mutex)
+    void signal(ball* mutex)
     {
         (*mutex)++;
     }
