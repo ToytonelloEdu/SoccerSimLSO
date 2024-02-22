@@ -26,7 +26,9 @@ enum actions {eShot, eInjury, eDribbling};
 
     void selectAction(struct player* player)
     {
-        wait(S);
+        printf("%d\n", *(&S));
+        wait(&S);
+        printf("%d\n", *(&S));
         
         int result = rand() % 3;
         
@@ -36,7 +38,8 @@ enum actions {eShot, eInjury, eDribbling};
 
         delay(5000);
 
-        signal(S);
+        signal(&S);
+        printf("%d\n", *(&S));
     }
 
     
@@ -68,7 +71,7 @@ enum actions {eShot, eInjury, eDribbling};
         pthread_t tid1 = Ref.teamA.members[0].playerTID;
         pthread_t tid2 = Ref.teamB.members[0].playerTID;
         
-        //pthread_create(&(tid1), NULL, startClientThread, (void*) Ref.teamA.captain);
+        pthread_create(&(tid1), NULL, startClientThread, (void*) Ref.teamA.captain);
         pthread_create(&(tid2), NULL, startClientThread, (void*) Ref.teamB.captain);
 
         Ref.time = 0;
