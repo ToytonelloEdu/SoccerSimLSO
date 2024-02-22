@@ -20,9 +20,8 @@ typedef int ball;
     void wait(ball* mutex)
     {
         while(*mutex <= 0);
-        printf("%d\n", *mutex);
+        
         (*mutex)--;
-        printf("%d\n", *mutex);
     }
 
     void signal(ball* mutex)
@@ -40,7 +39,7 @@ typedef int ball;
     void shot(struct referee* Ref, struct player* player)
     {
         int result = rand() % 2;    //0 GOAL -- 1 NO GOAL
-        printf("Shot\n");
+        printf("\tShot\n");
         if (result == 0) 
         { goal(Ref, player); } 
         else
@@ -49,7 +48,7 @@ typedef int ball;
 
     void injury(struct referee* Ref, struct player* player)
     {
-        printf("Injury\n");
+        printf("\tInjury\n");
     }
 
     void dribbling(struct referee* Ref, struct player* player)
@@ -57,7 +56,7 @@ typedef int ball;
         int result = rand() % 2;    //0 SUCCESS -- 1 FAILED
 
         addDribbling(&(Ref -> stats));
-        printf("Dribbling\n");
+        printf("\tDribbling\n");
 
         if (result == 0) { shot(Ref, player); }
     }
@@ -66,7 +65,7 @@ typedef int ball;
     {
         Ref -> stats.numberGoal++;
         int FD = Ref -> logFD;
-        printf("GOAL\n");
+        printf("\tGOAL\n");
 
     }
     
