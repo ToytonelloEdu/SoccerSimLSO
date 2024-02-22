@@ -17,6 +17,8 @@
 #include "gameLogicStructs.h"
 #include "gameLogicFuncts.h"
 
+#define DURATION 10
+
 ball S = 1;
 struct referee Ref;
 enum actions {eShot, eInjury, eDribbling};
@@ -25,15 +27,14 @@ enum actions {eShot, eInjury, eDribbling};
     void selectAction(struct player* player)
     {
         wait(S);
-
-        delay(2);
-
-
+        
         int result = rand() % 3;
         
         if (result == eShot ) { shot(&Ref, player); } 
         if (result == eInjury ) { injury(&Ref, player); }
         if (result == eDribbling ) { dribbling(&Ref, player); }
+
+        delay(5000);
 
         signal(S);
     }
@@ -42,7 +43,7 @@ enum actions {eShot, eInjury, eDribbling};
 
     void* startClientThread(void* player)
     {
-        while(Ref.time < 90)
+        while(Ref.time < DURATION)
             selectAction((struct player*) player);
     }
 
@@ -67,10 +68,11 @@ enum actions {eShot, eInjury, eDribbling};
         pthread_t tid1 = Ref.teamA.members[0].playerTID;
         pthread_t tid2 = Ref.teamB.members[0].playerTID;
         
-        pthread_create(&(tid1), NULL, startClientThread, (void*) Ref.teamA.captain);
+        //pthread_create(&(tid1), NULL, startClientThread, (void*) Ref.teamA.captain);
         pthread_create(&(tid2), NULL, startClientThread, (void*) Ref.teamB.captain);
 
-        while(Ref.time < 5)
+        Ref.time = 0;
+        while(Ref.time < DURATION)
         {
             Ref.time++;
             sleep(2);

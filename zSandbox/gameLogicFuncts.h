@@ -20,7 +20,9 @@ typedef int ball;
     void wait(ball mutex)
     {
         while(mutex <= 0);
+        printf("%d\n", &mutex);
         mutex--;
+        printf("%ls\n", mutex);
     }
 
     void signal(ball mutex)
