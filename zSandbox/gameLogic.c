@@ -15,50 +15,66 @@
 #include <asm-generic/socket.h>
 
 #include "gameLogicStructs.h"
+#include "gameLogicFuncts.h"
 
 ball S = 1;
 struct referee Ref;
-enum actions {shot, injury, dribbling};
+enum actions {eShot, eInjury, eDribbling};
+
 
     void selectAction(struct player* player)
-    { 
+    {
         wait(S);
-        sleep(2);
+
+        delay(2);
+
 
         int result = rand() % 3;
         
-        if (result == "shot" ) { shot(player); }
-        if (result == "injury" ) { injury(player); }
-        if (result == "dribbling" ) { dribbling(player); }
+        if (result == eShot ) { shot(&Ref, player); } 
+        if (result == eInjury ) { injury(&Ref, player); }
+        if (result == eDribbling ) { dribbling(&Ref, player); }
 
         signal(S);
     }
 
-    void shot(struct player* player)
+    
+
+    void* startClientThread(void* player)
     {
-        int result = rand() % 2;    //0 GOAL -- 1 NO GOAL
-
-        if (result == 0) 
-        { goal(&Ref, &player); } 
-        else
-        { addShotFailed(&(Ref.stats)); }
-    }
-
-    void injury(struct player* player)
-    {
-
-    }
-
-    void dribbling(struct player* player)
-    {
-        int result = rand() % 2;    //0 SUCCESS -- 1 FAILED
-
-        addDribbling(&(Ref.stats));
-
-        if (result == 0) { shot(&player); }
+        while(Ref.time < 90)
+            selectAction((struct player*) player);
     }
 
     int main()
     {
+        srand(time(NULL));
+        initTeam(Ref.teamA);
+        initTeam(Ref.teamB);
+
+        Ref.teamA.members[0].name = "Messi";
+        Ref.teamA.members[0].shirtNumber = 10;
+        Ref.teamA.members[0].playerFD = 2;
+
+        Ref.teamB.members[0].name = "Ronaldo";
+        Ref.teamB.members[0].shirtNumber = 7;
+        Ref.teamB.members[0].playerFD = 3;
+
+        initTeam(Ref.teamA);
+        initTeam(Ref.teamB);
+        
+        
+        pthread_t tid1 = Ref.teamA.members[0].playerTID;
+        pthread_t tid2 = Ref.teamB.members[0].playerTID;
+        
+        pthread_create(&(tid1), NULL, startClientThread, (void*) Ref.teamA.captain);
+        pthread_create(&(tid2), NULL, startClientThread, (void*) Ref.teamB.captain);
+
+        while(Ref.time < 5)
+        {
+            Ref.time++;
+            sleep(2);
+        }
+
         return 0;
     }

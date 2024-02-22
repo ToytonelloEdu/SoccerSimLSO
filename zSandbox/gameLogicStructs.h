@@ -3,22 +3,10 @@
 #define GLSTRUCT
 
 #include <pthread.h>
-typedef struct referee;
-typedef struct team;
-typedef struct player;
-typedef struct stats;
-typedef int ball;
-
-    void wait(ball mutex)
-    {
-        while(mutex <= 0);
-        mutex--;
-    }
-
-    void signal(ball mutex)
-    {
-        mutex++;
-    }
+struct referee;
+struct team;
+struct player;
+struct stats;
 
     struct player
     {
@@ -55,16 +43,5 @@ typedef int ball;
         int logFD;                     //file descriptor of the game log file
         int time;
     };
-
-    void goal(struct referee* referee, struct player* player)
-    {
-        referee -> stats.numberGoal++;
-        int FD = referee -> logFD;
-
-
-    }
-    
-    void addDribbling(struct stats* stats) { stats -> numberDribbling++; }
-    void addShotFailed(struct stats* stats) { stats -> shotFailed++; }
 
 #endif
