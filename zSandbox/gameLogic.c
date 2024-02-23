@@ -35,9 +35,10 @@ enum actions {eShot, eInjury, eDribbling};
         if (result == eInjury ) { injury(&Ref, player); }
         if (result == eDribbling ) { dribbling(&Ref, player); }
 
-        delay(5000);
+        delay(7500);
 
         signal(&S);
+        delay(200);
     }
 
     
@@ -59,23 +60,18 @@ enum actions {eShot, eInjury, eDribbling};
         Ref.teamA.teamName = "Nemezis";
         Ref.teamB.teamName = "CR7evens";
 
-        Ref.teamA.members[0].name = "Messi";
-        Ref.teamA.members[0].shirtNumber = 10;
+        initPlayer(Ref.teamA.captain, "Messi", 10, &(Ref.teamA.teamName));
         Ref.teamA.members[0].playerFD = 2;
-        Ref.teamA.members[0].teamName = &(Ref.teamA.teamName);
 
-        Ref.teamB.members[0].name = "Ronaldo";
-        Ref.teamB.members[0].shirtNumber = 7;
+        initPlayer(Ref.teamB.captain, "Ronaldo", 7, &(Ref.teamB.teamName));
         Ref.teamB.members[0].playerFD = 3;
-        Ref.teamB.members[0].teamName = &(Ref.teamB.teamName);
-        
         
         pthread_t* tid1 = &(Ref.teamA.members[0].playerTID);
         pthread_t* tid2 = &(Ref.teamB.members[0].playerTID);
         
         pthread_create(tid1, NULL, startClientThread, (void*) Ref.teamA.captain);
-        sleep(1);
-        pthread_create(tid2, NULL, startClientThread, (void*) &(Ref.teamB.members[0]));
+        //sleep(1);
+        pthread_create(tid2, NULL, startClientThread, (void*) Ref.teamB.captain);
 
         
         printf("Minute: 0\n");

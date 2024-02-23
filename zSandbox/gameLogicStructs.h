@@ -9,18 +9,20 @@ struct team;
 struct player;
 struct stats;
 
-    struct player
+    struct player //struct modeling players/clients
     {
-        int playerFD;
-        char* name;
+        int playerFD;                   //file descriptor of socket of the player/client
+        char* name;                     
         char shirtNumber; 
         char** teamName;
-        pthread_t playerTID;           //id for each thread managing of one the players/clients
+        pthread_t playerTID;           //id for thread managing of the player/client
     };
 
-    void initPlayer(struct player* player)
+    void initPlayer(struct player* player, char* name, char shirtNum, char** team)
     {
-        
+        player -> name = name;
+        player -> shirtNumber = shirtNum;
+        player -> teamName = team;
     }
 
     void printPlayer(struct player* player)
@@ -31,9 +33,9 @@ struct stats;
 
     struct team                        //struct modeling a football team of 5 players
     {
-        char* teamName;
-        struct player members[5];      //file descriptors of sockets for each player/client
-        struct player* captain;         
+        char* teamName;                
+        struct player members[5];      
+        struct player* captain;        
     };
 
     void initTeam(struct team* team)
