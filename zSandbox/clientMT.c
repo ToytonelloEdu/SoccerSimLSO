@@ -8,7 +8,12 @@
 
 int main(int argc, char* argv[]){
 
-    fork();
+    pid_t pid = fork();
+    if(pid == 0){
+        fork();
+        fork();
+    }
+
     
     int fd;
     struct sockaddr_un indirizzo;

@@ -19,7 +19,7 @@ void *gestisci(void *arg){
     char writebuffer[100] = "Fortunato down";
     int lung2 = strlen(writebuffer);
     write((int *) arg, writebuffer, lung2);
-    close((int *) arg);
+    //close((int *) arg);
     pthread_exit(0);
 }
 
@@ -39,6 +39,7 @@ int main(void){
 
     while((new_socket = accept(fd1, NULL, NULL)) > -1){
 
+        printf("%d\n", new_socket);
         pthread_create(&tid, NULL, gestisci, (void *) new_socket);
         pthread_detach(tid);
 
