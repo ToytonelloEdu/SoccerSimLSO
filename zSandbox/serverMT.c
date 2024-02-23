@@ -6,8 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include "gameLogicFuncts.h"
+#include "gameLogicStructs.h"
 
-void *gestisci(void *arg){
+void *gestisci(void *arg, void* player){
     char readbuffer[100] = "";
     read ((int *) arg, readbuffer, 100);
     int lung = strlen(readbuffer);
@@ -16,14 +18,17 @@ void *gestisci(void *arg){
     }
     printf("\n");
 
-    char writebuffer[100] = "Fortunato down";
+    char writebuffer[100] = "Fortunato down\n";
     int lung2 = strlen(writebuffer);
     write((int *) arg, writebuffer, lung2);
+    printPlayer((struct player*) player);
     //close((int *) arg);
     pthread_exit(0);
 }
 
 int main(void){
+
+    struct referee ref;
 
     int fd1, new_socket;
     struct sockaddr_un indirizzo;
@@ -37,13 +42,17 @@ int main(void){
 
     listen(fd1, 5);
 
-    while((new_socket = accept(fd1, NULL, NULL)) > -1){
+    for(int i = 0; i < 1; i++){
 
-        printf("%d\n", new_socket);
-        pthread_create(&tid, NULL, gestisci, (void *) new_socket);
-        pthread_detach(tid);
+        ref.teamB.members[i].playerFD = accept(fd1, NULL, NULL);
+        //printPlayer(&(ref.teamB.captain));
 
-    }
+        printf("%d\n", ref.teamB.members[i].playerFD);
+        pthread_create(&(ref.teamB.members[i].playerTID), NULL, gestisci, ((void *) ref.teamB.members[i].playerFD, (void *) ref.teamB.captain));
+        pthread_detach(ref.teamB.members[i].playerTID);
+
+        }
+
 
     close(fd1);
     unlink("/tmp/mio_socket");

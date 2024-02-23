@@ -5,16 +5,34 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include "gameLogicFuncts.h"
+#include "gameLogicStructs.h"
 
 int main(int argc, char* argv[]){
 
-    pid_t pid = fork();
-    if(pid == 0){
-        fork();
-        fork();
-    }
+    struct referee ref;
 
+    initTeam(&(ref.teamB));
+    ref.teamB.teamName = "Real Madrid";
+    initPlayer(ref.teamB.captain, "Ronaldo", 7, &(ref.teamB.teamName));
     
+    /* pid_t pid = fork();
+    if(pid == 0){
+        initPlayer(&(ref.teamB.members[1]), "Benzema", 9, &(ref.teamB.teamName));
+
+        pid_t pid2 = fork();
+        if(pid2 == 0){
+            initPlayer(&(ref.teamB.members[2]), "Bale", 11, &(ref.teamB.teamName));
+        }
+        
+        pid_t pid3 = fork();
+        if(pid3 == 0){
+            initPlayer(&(ref.teamB.members[3]), "Isco", 15, &(ref.teamB.teamName));
+        } else {
+            initPlayer(&(ref.teamB.members[4]), "Modric", 10, &(ref.teamB.teamName));
+        }
+    } */
+
     int fd;
     struct sockaddr_un indirizzo;
 
