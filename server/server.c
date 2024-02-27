@@ -13,6 +13,9 @@
 #include <arpa/inet.h>
 #include <asm-generic/socket.h>
 
+#include "../lib/gameLogicStructs.h"
+#include "../lib/gameLogicFuncts.h"
+
 #define BUFFSIZE 512
 
 int main()
