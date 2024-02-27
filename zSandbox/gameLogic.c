@@ -49,6 +49,8 @@ enum actions {eShot, eInjury, eDribbling};
 
         while(Ref.time < DURATION)
             selectAction((struct player*) player);
+
+        pthread_exit(0);
     }
 
     int main()
