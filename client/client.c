@@ -42,9 +42,29 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    char buffer[BUFFSIZE] = ""; 
-    int rdout = read(sock_fd, buffer, BUFFSIZE);
-    printf("%s\n", buffer);
+    int rdout = 1;
+    do
+    {
+        char rBuffer[BUFFSIZE] = ""; 
+        rdout = read(sock_fd, rBuffer, BUFFSIZE);
+        //printf("%c", buffer[0]);
+        for(int i = 3; i < strlen(rBuffer); i++)
+        {
+            printf("%c", rBuffer[i]);
+        }
+        
+        if (rBuffer[1] == '0')
+            write(sock_fd, "", 1);
+        else if(rBuffer[1] == '1')
+        {
+            char wBuffer[BUFFSIZE];
+            fgets(wBuffer, BUFFSIZE, stdin);
+            write(sock_fd, wBuffer, strlen(wBuffer));
+        }
+        else
+            write(sock_fd, "ERROR", 6);
+        
+    }while(rdout > -1);
 
     close(sock_fd);
 

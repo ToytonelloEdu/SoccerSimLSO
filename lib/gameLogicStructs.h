@@ -14,11 +14,11 @@ struct stats;
         int playerFD;                   //file descriptor of socket of the player/client
         char* name;                     
         char shirtNumber; 
-        char** teamName;
+        char* teamName;
         pthread_t playerTID;           //id for thread managing of the player/client
     };
 
-    void initPlayer(struct player* player, char* name, char shirtNum, char** team)
+    void initPlayer(struct player* player, char* name, char shirtNum, char* team)
     {
         player -> name = name;
         player -> shirtNumber = shirtNum;
@@ -27,7 +27,7 @@ struct stats;
 
     void printPlayer(struct player* player)
     {
-        printf("\t(No %d) %s for team %s\n", player->shirtNumber, player->name, *(player->teamName));
+        printf("\t(No %d) %s for team %s\n", player->shirtNumber, player->name, player->teamName);
     }
     
 
@@ -41,6 +41,8 @@ struct stats;
     void initTeam(struct team* team)
     {
         team->captain = &(team->members[0]);
+        for(int i = 0; i < 5; i++)
+            team->members[i].teamName = team->teamName;
     }
 
     struct stats                       //struct modeling the stats of the game
@@ -52,6 +54,9 @@ struct stats;
 
     struct referee                     //struct modeling the referee of the game
     {
+        char gameStatus; //0 = no game, 1 = game creation finished, 2 = game creation in corso
+        pthread_t lastThread;
+
         struct team teamA; 
         struct team teamB;
         struct stats stats;
@@ -61,6 +66,7 @@ struct stats;
 
     void InitReferee(struct referee* referee)
     {
+        referee->gameStatus = 0;
         referee->time = -1;
         
     }
