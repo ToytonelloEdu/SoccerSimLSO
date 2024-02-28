@@ -76,8 +76,8 @@ void* AcceptNewPlayer(void* socketFD)
         setBuff(buffer, "La partita è ");
         strcat(buffer, Ref.teamA.teamName);
         strcat(buffer, "-");
-        Ref.teamB.teamName[strcspn(Ref.teamB.teamName, "\n")] = 0;
         strcat(buffer, Ref.teamB.teamName);
+        Ref.teamB.teamName[strcspn(Ref.teamB.teamName, "\n")] = 0;
         
         printf("%s\n", buffer);
         sendMSG(sockFD, buffer);
@@ -173,10 +173,9 @@ int main()
 
     while((new_socket = accept(wsock_fd, (struct sockaddr*)&cliaddr, (socklen_t*)&addrlen)) > -1)
     {
-        char buffer[] = "Cirogay";
-        int wrout = write(new_socket, buffer, strlen(buffer));
-        printf("Messaggio mandato\n");
-        close(new_socket);
+        printf("New player connected\n");
+        pthread_create(&Ref.lastThread, NULL, AcceptNewPlayer, (void*) &new_socket);
+        pthread_detach(Ref.lastThread);
     }
 
     close (wsock_fd);

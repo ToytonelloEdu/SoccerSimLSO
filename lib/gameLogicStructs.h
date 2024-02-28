@@ -33,7 +33,7 @@ struct stats;
 
     struct team                        //struct modeling a football team of 5 players
     {
-        char* teamName;                
+        char teamName[15];                
         struct player members[5];      
         struct player* captain;        
     };
