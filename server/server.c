@@ -18,6 +18,46 @@
 
 #define BUFFSIZE 512
 
+struct referee Ref;
+
+void* AcceptNewPlayer(void* socketFD)
+{
+    int sockFD = *((int*) socketFD);
+    if(Ref.gameBool == 0)
+    {
+        Ref.gameBool = 2;
+        char buffer[BUFFSIZE] = "";
+        write(sockFD, "(0)Inizio creazione partita\n\n", 30);
+        read(sockFD, buffer, BUFFSIZE);
+
+        write(sockFD, "(1)Inserisci nome Squadra A: ", 30);
+        read(sockFD, buffer, BUFFSIZE);
+        strncpy(Ref.teamA.teamName, buffer, strlen(buffer));
+        printf("Il primo team è %s", Ref.teamA.teamName);
+
+        memset(buffer, 0, strlen(buffer));
+
+        write(sockFD, "(1)Inserisci nome Squadra B: ", 30);
+        read(sockFD, buffer, BUFFSIZE);
+        strncpy(Ref.teamB.teamName, buffer, strlen(buffer));
+        printf("Il secondo team è %s", Ref.teamB.teamName);
+
+
+        printf("La partita è "); printf("%s", Ref.teamA.teamName); printf("-"); printf("%s", Ref.teamB.teamName);
+
+        Ref.gameBool = 1;
+    }
+    else
+    {
+        while(Ref.gameBool != 1);
+
+        //aggiungiti alla partita
+    }
+
+
+
+}
+
 int main()
 {
     printf("Welcome to LSOccer Simulator's Server!\n");
@@ -25,6 +65,7 @@ int main()
     int wsock_fd, new_socket;
     int opt = 1;
     struct sockaddr_in servaddr, cliaddr;
+    InitReferee(&Ref);
     
     if((wsock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -58,12 +99,14 @@ int main()
 
     int addrlen = sizeof(cliaddr);
 
+    
+
     while((new_socket = accept(wsock_fd, (struct sockaddr*)&cliaddr, (socklen_t*)&addrlen)) > -1)
     {
-        char buffer[] = "Cirogay";
-        int wrout = write(new_socket, buffer, strlen(buffer));
-        printf("Messaggio mandato\n");
-        close(new_socket);
+        printf("New player connected\n");
+        pthread_create(&Ref.lastThread, NULL, AcceptNewPlayer, (void*) &new_socket);
+        pthread_detach(Ref.lastThread);
+        
     }
 
     close (wsock_fd);

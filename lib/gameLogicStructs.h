@@ -33,7 +33,7 @@ struct stats;
 
     struct team                        //struct modeling a football team of 5 players
     {
-        char* teamName;                
+        char teamName[15];                
         struct player members[5];      
         struct player* captain;        
     };
@@ -52,6 +52,9 @@ struct stats;
 
     struct referee                     //struct modeling the referee of the game
     {
+        char gameBool; //0 = no game, 1 = game creation finished, 2 = game creation in corso
+        pthread_t lastThread;
+
         struct team teamA; 
         struct team teamB;
         struct stats stats;
@@ -61,6 +64,7 @@ struct stats;
 
     void InitReferee(struct referee* referee)
     {
+        referee->gameBool = 0;
         referee->time = -1;
         
     }
