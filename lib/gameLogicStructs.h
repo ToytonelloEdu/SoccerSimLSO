@@ -4,6 +4,9 @@
 
 #include <pthread.h>
 #include <string.h>
+
+enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded};
+
 struct referee;
 struct team;
 struct player;
@@ -54,7 +57,7 @@ struct stats;
 
     struct referee                     //struct modeling the referee of the game
     {
-        char gameStatus; //0 = no game, 1 = game creation finished, 2 = game creation in corso
+        enum gameStatusEnum gameStatus;
         pthread_t lastThread;
 
         struct team teamA; 
@@ -66,7 +69,7 @@ struct stats;
 
     void InitReferee(struct referee* referee)
     {
-        referee->gameStatus = 0;
+        referee->gameStatus = nogame;
         referee->time = -1;
         
     }
