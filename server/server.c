@@ -58,11 +58,12 @@ void printStatusMatch(int sockFD, char buffer[], struct player* currPlayer, char
         setBuff(buffer, "Sei il capitano della squadra A\n");
         sendMSG(sockFD, buffer);
         read(sockFD, buffer, BUFFSIZE);
+        setBuff(buffer, "");
+
         askMSG(sockFD, "Inserisci nome Squadra A: ");
         read(sockFD, buffer, BUFFSIZE);
-        strncpy(Ref.teamA.teamName, buffer, strlen(buffer));
-        printf("Il primo team è %s", Ref.teamA.teamName);
-        setBuff(buffer, "");
+        strcpy_noNL(Ref.teamA.teamName, buffer);
+        printf("Il primo team è %s\n", Ref.teamA.teamName);     
     }
 
     if (team == 'B')
@@ -70,12 +71,15 @@ void printStatusMatch(int sockFD, char buffer[], struct player* currPlayer, char
         setBuff(buffer, "Sei il capitano della squadra B\n");
         sendMSG(sockFD, buffer);
         read(sockFD, buffer, BUFFSIZE);
+        setBuff(buffer, "");
+
         askMSG(sockFD, "Inserisci nome Squadra B: ");
         read(sockFD, buffer, BUFFSIZE);
-        strncpy(Ref.teamB.teamName, buffer, strlen(buffer));
-        printf("Il secondo team è %s", Ref.teamB.teamName);
-        setBuff(buffer, "");
+        strcpy_noNL(Ref.teamB.teamName, buffer);
+        printf("Il secondo team è %s\n", Ref.teamB.teamName);
     }
+
+    setBuff(buffer, "");
 
     askMSG(sockFD, "Inserisci il tuo nome: ");
     read(sockFD, buffer, BUFFSIZE);
@@ -86,7 +90,7 @@ void printStatusMatch(int sockFD, char buffer[], struct player* currPlayer, char
 
     askMSG(sockFD, "Inserisci il tuo numero di maglia: ");
     read(sockFD, buffer, BUFFSIZE); 
-    char sNum[3]; strncpy(sNum, buffer, strlen(buffer));
+    char sNum[3]; strcpy_noNL(sNum, buffer);
     int num = atoi(buffer);
 
     setBuff(buffer, "");
@@ -97,6 +101,8 @@ void printStatusMatch(int sockFD, char buffer[], struct player* currPlayer, char
     currPlayer->playerFD = sockFD;
     currPlayer->playerTID = syscall(__NR_gettid);
 
+    //Ref.teamA.teamName[strcspn(Ref.teamA.teamName, "\n")] = 0;
+    //Ref.teamB.teamName[strcspn(Ref.teamB.teamName, "\n")] = 0;
     setBuff(buffer, "Il capitano della squadra ");
     strcat(buffer, currPlayer->teamName);
     strcat(buffer, " è ");
@@ -109,21 +115,11 @@ void printStatusMatch(int sockFD, char buffer[], struct player* currPlayer, char
     sendMSG(sockFD, buffer);
     read(sockFD, buffer, BUFFSIZE);
 
-    Ref.gameStatus--;
-    printf("Ciao %d\n", Ref.gameStatus);
-    while(Ref.gameStatus != gameCreated);
-    printf("Arrivederci %d\n", Ref.gameStatus);
+    setBuff(buffer, "");
 
-    Ref.teamA.teamName[strcspn(Ref.teamA.teamName, "\n")] = 0;
-    setBuff(buffer, "La partita è ");
-    strcat(buffer, Ref.teamA.teamName);
-    strcat(buffer, "-");
-    strcat(buffer, Ref.teamB.teamName);
-    Ref.teamB.teamName[strcspn(Ref.teamB.teamName, "\n")] = 0;
-    
-    printf("%s", buffer);
-    sendMSG(sockFD, buffer);
-    read(sockFD, buffer, BUFFSIZE);
+    Ref.gameStatus--;
+
+    while(Ref.gameStatus != gameCreated);
 }
 
 
@@ -144,6 +140,7 @@ void* AcceptNewPlayer(void* socketFD)
 
             printStatusMatch(sockFD, buffer, currPlayer, 'A');
             
+            /*
             // setBuff(buffer, "Sei il capitano della squadra A\n");
             // sendMSG(sockFD, buffer);
             // read(sockFD, buffer, BUFFSIZE);
@@ -204,6 +201,19 @@ void* AcceptNewPlayer(void* socketFD)
             // read(sockFD, buffer, BUFFSIZE);
 
             //gamemaster accetta nuovi giocatori
+            */
+    
+            setBuff(buffer, "La partita è ");
+            strcat(buffer, Ref.teamA.teamName);
+            strcat(buffer, "-");
+            strcat(buffer, Ref.teamB.teamName);
+            strcat(buffer, "\n");
+            
+            
+            sendMSG(sockFD, buffer);
+            read(sockFD, buffer, BUFFSIZE);
+            printf("%s", buffer);
+    
     }
     else if(Ref.gameStatus == oneCaptainNeeded )
     {
@@ -211,7 +221,7 @@ void* AcceptNewPlayer(void* socketFD)
             currPlayer = Ref.teamB.captain;
 
             printStatusMatch(sockFD, buffer, currPlayer, 'B');
-
+            /*
             // setBuff(buffer, "");
 
             // setBuff(buffer, "Sei il capitano della squadra B\n");
@@ -272,7 +282,18 @@ void* AcceptNewPlayer(void* socketFD)
             // sendMSG(sockFD, buffer);
             // read(sockFD, buffer, BUFFSIZE);
 
-            // //capitano accetta nuovi
+            // //capitano accetta nuovi */
+    
+            setBuff(buffer, "La partita è ");
+            strcat(buffer, Ref.teamA.teamName);
+            strcat(buffer, "-");
+            strcat(buffer, Ref.teamB.teamName);
+            strcat(buffer, "\n");
+
+            
+            sendMSG(sockFD, buffer);
+            read(sockFD, buffer, BUFFSIZE);
+    
     }
     else 
     {
