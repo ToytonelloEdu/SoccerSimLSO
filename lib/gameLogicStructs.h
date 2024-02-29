@@ -38,12 +38,14 @@ struct stats;
     {
         char teamName[15];                
         struct player members[5];      
-        struct player* captain;        
+        struct player* captain;  
+        char membNum;      
     };
 
     void initTeam(struct team* team)
     {
         team->captain = &(team->members[0]);
+        team->membNum = 0;
         for(int i = 0; i < 5; i++)
             team->members[i].teamName = team->teamName;
     }
