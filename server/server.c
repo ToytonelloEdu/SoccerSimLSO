@@ -18,10 +18,11 @@
 #include "../lib/gameLogicFuncts.h"
 
 #define BUFFSIZE 512
+#define QSIZE 15
 
 struct referee Ref;
-struct player playerQueueA[15]; short addedIndexA = 0, viewedIndexA = 0;
-struct player playerQueueB[15]; short addedIndexB = 0; viewedIndexB = 0;
+struct player playerQueueA[QSIZE]; short addedIndexA = 0, viewedIndexA = 0;
+struct player playerQueueB[QSIZE]; short addedIndexB = 0, viewedIndexB = 0;
 
 int sendMSG(int socket, char* msg)
 {
@@ -141,11 +142,12 @@ void* AcceptNewPlayer(void* socketFD)
             strcat(buffer, Ref.teamB.teamName);strcat(buffer, "\n");
             
             
-            sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
             printf("%s", buffer);
+            sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+            
 
             //capitano accetta giocatori
-            while(Ref.teamB.membNum < 5)
+            while(Ref.teamB.membNum < TEAMSIZE)
             {
                 while(addedIndexB == viewedIndexB);
 
@@ -171,11 +173,28 @@ void* AcceptNewPlayer(void* socketFD)
             
             sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
 
+                setBuff(buffer, "");
+
             //capitano accetta giocatori
-            while(Ref.teamB.membNum < 5)
+            while(Ref.teamB.membNum < TEAMSIZE)
             {
                 while(addedIndexB == viewedIndexB);
 
+                sendMSG(sockFD, "Un giocatore ha richiesto di entrare nella tua squadra\n"); read(sockFD, buffer, BUFFSIZE);
+                setBuff(buffer, playerQueueB[viewedIndexB].name); strcat(buffer, ", lo vuoi accettare? (Y/N)\n");
+                askMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+                char answer = buffer[0];
+
+                if(answer == 'Y')
+                {
+                    Ref.teamB.members[Ref.teamB.membNum] = playerQueueB[viewedIndexB];
+                    sendMSG(playerQueueB[viewedIndexB].playerFD, "Accettato nella squadra B");
+
+                }
+                else if(answer == 'N')
+                {
+
+                }
 
 
 
@@ -199,9 +218,10 @@ void* AcceptNewPlayer(void* socketFD)
             read(sockFD, buffer, BUFFSIZE);
         }
 
-        sendMSG(sockFD, "Crea il tuo giocatore\n");
+        sendMSG(sockFD, "Crea il tuo giocatore!\n");
         
         struct player tmpPlayer;
+        char ansBuff[BUFFSIZE] = "";
 
         askMSG(sockFD, "Inserisci il tuo nome: ");
         read(sockFD, buffer, BUFFSIZE);
@@ -211,15 +231,52 @@ void* AcceptNewPlayer(void* socketFD)
 
         askMSG(sockFD, "Inserisci il tuo numero di maglia: ");
         read(sockFD, buffer, BUFFSIZE); int num = atoi(buffer);
-        char sNum[3]; strncpy(sNum, buffer, strlen(buffer));
+        char sNum[3] = ""; strcpy_noNL(sNum, buffer);
+        printf("%s\n", sNum);
         
             setBuff(buffer, "");
 
-        initPlayer(&tmpPlayer, name, num, NULL);
+        initPlayer(&tmpPlayer, name, sNum, NULL);
         tmpPlayer.playerFD = sockFD;
         tmpPlayer.playerTID = syscall(__NR_gettid);
+        printPlayer(&tmpPlayer);
+
+            setBuff(buffer, "");
+        /*
+        setBuff(buffer, "Nuovo giocatore: "); strcat(buffer, tmpPlayer.name);
+        strcat(buffer, " con numero "); strcat(buffer, "7"); strcat(buffer, "\n");
+        //printf("%s", buffer);
+        sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE); 
+
+            setBuff(buffer, "");
 
         //nuovo giocatore si pone in coda per entrare in una squadra
+        
+        setBuff(buffer, "1-> "); strcat(buffer, Ref.teamA.teamName);
+        strcat(buffer, "; 2-> "); strcat(buffer, Ref.teamB.teamName);
+        strcat(buffer, "\n"); sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+
+        setBuff(buffer, "");
+
+        
+        askMSG(sockFD, "Decidi di che squadra far parte: "); 
+        read(sockFD, ansBuff, BUFFSIZE);
+        char teamChoice = atoi(ansBuff);
+
+        if(teamChoice == 1)
+        {
+            playerQueueA[addedIndexA] = tmpPlayer;
+            addedIndexA = (addedIndexA+1)%QSIZE;
+        }
+        else if(teamChoice == 2)
+        {  
+            playerQueueB[addedIndexB] = tmpPlayer;
+            addedIndexB = (addedIndexB+1)%QSIZE;
+        }
+
+        read(sockFD, buffer, BUFFSIZE); */
+
+
         
     }
 

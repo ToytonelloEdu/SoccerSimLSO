@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <string.h>
 
+#define TEAMSIZE 5
+
 enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded};
 
 struct referee;
@@ -37,7 +39,7 @@ struct stats;
     struct team                        //struct modeling a football team of 5 players
     {
         char teamName[15];                
-        struct player members[5];      
+        struct player members[TEAMSIZE];      
         struct player* captain;  
         char membNum;      
     };
@@ -46,7 +48,7 @@ struct stats;
     {
         team->captain = &(team->members[0]);
         team->membNum = 0;
-        for(int i = 0; i < 5; i++)
+        for(int i = 0; i < TEAMSIZE; i++)
             team->members[i].teamName = team->teamName;
     }
 
