@@ -183,7 +183,7 @@ void* AcceptNewPlayer(void* socketFD)
         {
             sendMSG(sockFD, "Creazione partita in corso: ATTENDI\n\n");
             read(sockFD, buffer, BUFFSIZE);
-            while(Ref.gameStatus != 1);
+            while(Ref.gameStatus != gameCreated);
             sendMSG(sockFD, "Partita creata!\n");
             read(sockFD, buffer, BUFFSIZE);
         }
