@@ -190,13 +190,14 @@ void* AcceptNewPlayer(void* socketFD)
                     Ref.teamB.members[Ref.teamB.membNum] = playerQueueB[viewedIndexB];
                     sendMSG(playerQueueB[viewedIndexB].playerFD, "Accettato nella squadra B");
 
+
                 }
                 else if(answer == 'N')
                 {
 
                 }
 
-
+                viewedIndexB++;
 
             }
     
@@ -218,10 +219,12 @@ void* AcceptNewPlayer(void* socketFD)
             read(sockFD, buffer, BUFFSIZE);
         }
 
-        sendMSG(sockFD, "Crea il tuo giocatore!\n");
+        sendMSG(sockFD, "Crea il tuo giocatore!\n"); read(sockFD, buffer, BUFFSIZE);
         
         struct player tmpPlayer;
         char ansBuff[BUFFSIZE] = "";
+
+            setBuff(buffer, "");
 
         askMSG(sockFD, "Inserisci il tuo nome: ");
         read(sockFD, buffer, BUFFSIZE);
@@ -229,12 +232,13 @@ void* AcceptNewPlayer(void* socketFD)
 
             setBuff(buffer, "");
 
-        
-        printf("%s\n", sNum);
+        askMSG(sockFD, "Inserisci il tuo numero di maglia: ");
+        read(sockFD, buffer, BUFFSIZE); int num = atoi(buffer);
+        char sNum[3] = ""; strcpy_noNL(sNum, buffer);
         
             setBuff(buffer, "");
        
-        /*
+        
         initPlayer(&tmpPlayer, name, num, NULL);
         tmpPlayer.playerFD = sockFD;
         tmpPlayer.playerTID = syscall(__NR_gettid);
@@ -273,7 +277,7 @@ void* AcceptNewPlayer(void* socketFD)
             addedIndexB = (addedIndexB+1)%QSIZE;
         }
 
-        read(sockFD, buffer, BUFFSIZE); */
+        read(sockFD, buffer, BUFFSIZE);
 
 
         
