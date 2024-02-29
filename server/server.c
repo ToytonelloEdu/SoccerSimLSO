@@ -229,20 +229,19 @@ void* AcceptNewPlayer(void* socketFD)
 
             setBuff(buffer, "");
 
-        askMSG(sockFD, "Inserisci il tuo numero di maglia: ");
-        read(sockFD, buffer, BUFFSIZE); int num = atoi(buffer);
-        char sNum[3] = ""; strcpy_noNL(sNum, buffer);
+        
         printf("%s\n", sNum);
         
             setBuff(buffer, "");
-
-        initPlayer(&tmpPlayer, name, sNum, NULL);
+       
+        /*
+        initPlayer(&tmpPlayer, name, num, NULL);
         tmpPlayer.playerFD = sockFD;
         tmpPlayer.playerTID = syscall(__NR_gettid);
         printPlayer(&tmpPlayer);
 
             setBuff(buffer, "");
-        /*
+        
         setBuff(buffer, "Nuovo giocatore: "); strcat(buffer, tmpPlayer.name);
         strcat(buffer, " con numero "); strcat(buffer, "7"); strcat(buffer, "\n");
         //printf("%s", buffer);
