@@ -171,6 +171,8 @@ int main()
 
     int addrlen = sizeof(cliaddr);
 
+    
+
     while((new_socket = accept(wsock_fd, (struct sockaddr*)&cliaddr, (socklen_t*)&addrlen)) > -1)
     {
         printf("New player connected\n");
