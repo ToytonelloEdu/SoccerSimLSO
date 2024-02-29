@@ -79,7 +79,7 @@ void* AcceptNewPlayer(void* socketFD)
         strcat(buffer, Ref.teamB.teamName);
         Ref.teamB.teamName[strcspn(Ref.teamB.teamName, "\n")] = 0;
         
-        printf("%s\n", buffer);
+        printf("%s", buffer);
         sendMSG(sockFD, buffer);
         read(sockFD, buffer, BUFFSIZE);
 
@@ -106,7 +106,7 @@ void* AcceptNewPlayer(void* socketFD)
         Ref.teamA.captain->playerFD = sockFD;
         Ref.teamA.captain->playerTID = syscall(__NR_gettid);
 
-        printPlayer(Ref.teamA.captain);
+        printPlayer(Ref.teamA.captain); 
 
 
         
