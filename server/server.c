@@ -102,7 +102,7 @@ void* AcceptNewPlayer(void* socketFD)
         Ref.gameStatus = oneCaptainNeeded;
 
             currPlayer = Ref.teamA.captain;
-            close(pipe_A[0]);
+
 
             sendMSG(sockFD, "Inizio creazione partita\n\n"); read(sockFD, buffer, BUFFSIZE);
             setBuff(buffer, "");
@@ -148,16 +148,16 @@ void* AcceptNewPlayer(void* socketFD)
                 viewedIndexA++;
 
 
-
-
             }
-    
+
+            sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
+            while(Ref.teamB.membNum < 5);
+
     }
     else if(Ref.gameStatus == oneCaptainNeeded )
     {
         Ref.gameStatus--;
             currPlayer = Ref.teamB.captain;
-            close(pipe_B[0]);
 
             TeamCaptainInitialization(sockFD, buffer, currPlayer, 'B');
             Ref.teamB.membNum++;
@@ -200,6 +200,9 @@ void* AcceptNewPlayer(void* socketFD)
                 viewedIndexB++;
 
             }
+
+            sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
+            while(Ref.teamA.membNum < 5);
     
     }
     else 
@@ -218,8 +221,6 @@ void* AcceptNewPlayer(void* socketFD)
             sendMSG(sockFD, "Creazione partita completata\n\n");
             read(sockFD, buffer, BUFFSIZE);
         }
-
-        close(pipe_A[1]); close(pipe_B[1]); 
 
         sendMSG(sockFD, "Crea il tuo giocatore!\n"); read(sockFD, buffer, BUFFSIZE);
         
@@ -287,12 +288,16 @@ void* AcceptNewPlayer(void* socketFD)
 
         }
 
+
         read(sockFD, buffer, BUFFSIZE);
         setBuff(buffer, "");
 
+        if(Ref.gameStatus < gameStarting)
+        {
+            sendMSG(sockFD, "Squadre non al completo, attendi inizio partita");
+            while(Ref.gameStatus != gameStarting);
+        }
         
-
-        //R-T-P
 
 
         
@@ -355,7 +360,7 @@ int main()
         pthread_detach(Ref.lastThread);
     }
 
-    close (wsock_fd);
+    close(wsock_fd);
 
     return 0;
 }
