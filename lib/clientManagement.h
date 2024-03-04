@@ -27,6 +27,12 @@ void setBuff(char* buffer, char* text)
     strcpy(buffer, text);
 }
 
+void setnBuff(char* buffer, char* text, size_t size)
+{
+    memset(buffer, 0, size);
+    strncpy(buffer, text, size);
+}
+
 void strcpy_noNL(char* dest, char* source)
 {
     strncpy(dest, source, strlen(source));
@@ -44,24 +50,22 @@ void createPipe(int pipeFD[2])
 
 void sendTeamResponseByPipe(int pipeWrite, char* response, char* team, char position)
 {
-    char buffer[10];
+    char buffer[20];
     char pos[2]; pos[0] = position + 48; pos[1] = '\0';
-    printf("char[2] non è l'errore\n");
-    setBuff(buffer, response); strcat(buffer, "-");
+
+    setnBuff(buffer, response, 20); strcat(buffer, "-");
     strcat(buffer, team); strcat(buffer, "-"); 
     strcat(buffer, pos);
-    printf("La concat di char[2] non è l'errore\n");
     //R-T-P (R->0, T->2, P->4)
+
     write(pipeWrite, buffer, strlen(buffer));
-    printf("Messaggio mandato sulla pipe\n");
 }
 
 int recvTeamResponseByPipe(int pipeRead, struct referee Ref, struct player* player)
 {
-    char buffer[10];
-    printf("Prima della read della pipe\n");
-    read(pipeRead, buffer, 10);
-    printf("Messaggio ricevuto sulla pipe\n");
+    char buffer[20];
+
+    read(pipeRead, buffer, 20);
 
     if(buffer[0] == '0') { return 0; }
 
@@ -73,8 +77,7 @@ int recvTeamResponseByPipe(int pipeRead, struct referee Ref, struct player* play
     if(buffer[2] == 'B')
         player = & Ref.teamB.members[pos];
     
-    printf("Messaggio correttamente decodificato\n");
-    
+
     return 1;
 }
 
@@ -90,20 +93,7 @@ int askMSG(int socket, char* msg)
     strcat(buff, msg);
     return write(socket, buff, strlen(buff));
 }
-/* 
-int sendSuccessMSG(int socket, char* msg)
-{
-    char buff[BUFFSIZE] = "(2)";
-    strcat(buff, msg);
-    return write(socket, buff, strlen(buff));
-}
-int sendFailureMSG(int socket, char* msg)
-{
-    char buff[BUFFSIZE] = "(3)";
-    strcat(buff, msg);
-    return write(socket, buff, strlen(buff));
-}
- */
+
 int recMSG(int socket, char* msg)
 {
 
