@@ -16,43 +16,16 @@
 
 #include "../lib/gameLogicStructs.h"
 #include "../lib/gameLogicFuncts.h"
+#include "../lib/clientManagement.h"
 
-#define BUFFSIZE 512
+
 #define QSIZE 15
 
-struct referee Ref;
+struct referee Ref; int pipe_A[2]; int pipe_B[2];
 struct player playerQueueA[QSIZE]; short addedIndexA = 0, viewedIndexA = 0;
 struct player playerQueueB[QSIZE]; short addedIndexB = 0, viewedIndexB = 0;
 
-int sendMSG(int socket, char* msg)
-{
-    char buff[BUFFSIZE] = "(0)";
-    strcat(buff, msg);
-    return write(socket, buff, strlen(buff));
-}
-int askMSG(int socket, char* msg)
-{
-    char buff[BUFFSIZE] = "(1)";
-    strcat(buff, msg);
-    return write(socket, buff, strlen(buff));
-}
-int recMSG(int socket, char* msg)
-{
-
-}
-void setBuff(char* buffer, char* text)
-{
-    memset(buffer, 0, BUFFSIZE);
-    strcpy(buffer, text);
-}
-
-void strcpy_noNL(char* dest, char* source)
-{
-    strncpy(dest, source, strlen(source));
-    dest[strcspn(dest, "\n")] = 0;
-}
-
-void printStatusMatch(int sockFD, char buffer[], struct player* currPlayer, char team)
+void TeamCaptainInitialization(int sockFD, char buffer[], struct player* currPlayer, char team)
 {    
 
     if (team == 'A')
@@ -129,11 +102,12 @@ void* AcceptNewPlayer(void* socketFD)
         Ref.gameStatus = oneCaptainNeeded;
 
             currPlayer = Ref.teamA.captain;
+            close(pipe_A[0]);
 
             sendMSG(sockFD, "Inizio creazione partita\n\n"); read(sockFD, buffer, BUFFSIZE);
             setBuff(buffer, "");
 
-            printStatusMatch(sockFD, buffer, currPlayer, 'A');
+            TeamCaptainInitialization(sockFD, buffer, currPlayer, 'A');
             Ref.teamA.membNum++;
 
 
@@ -144,6 +118,8 @@ void* AcceptNewPlayer(void* socketFD)
             
             printf("%s", buffer);
             sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+            
+            
             
 
             //capitano accetta giocatori
@@ -159,17 +135,14 @@ void* AcceptNewPlayer(void* socketFD)
                 if(answer == 'Y')
                 {
                     Ref.teamA.members[Ref.teamA.membNum] = playerQueueA[viewedIndexA];
-                    Ref.teamA.membNum++;
-                    sendMSG(playerQueueA[viewedIndexA].playerFD, "Accettato nella squadra A");
-                    read(playerQueueA[viewedIndexA].playerFD, buffer, BUFFSIZE);
                     sendMSG(sockFD, "Giocatore accettato\n"); read(sockFD, buffer, BUFFSIZE);
-
-
+                    sendTeamResponseByPipe(pipe_A[1], "1", "A", Ref.teamA.membNum);
+                    Ref.teamA.membNum++;
                 }
                 else if(answer == 'N')
                 {
-                    sendMSG(playerQueueA[viewedIndexA].playerFD, "Rifiutato dalla squadra A");
-                    sendMSG(sockFD, "Giocatore rifiutato\n");
+                    sendMSG(sockFD, "Giocatore rifiutato\n"); read(sockFD, buffer, BUFFSIZE);
+                    sendTeamResponseByPipe(pipe_A[1], "0", "A", Ref.teamA.membNum);
                 }
 
                 viewedIndexA++;
@@ -184,8 +157,9 @@ void* AcceptNewPlayer(void* socketFD)
     {
         Ref.gameStatus--;
             currPlayer = Ref.teamB.captain;
+            close(pipe_B[0]);
 
-            printStatusMatch(sockFD, buffer, currPlayer, 'B');
+            TeamCaptainInitialization(sockFD, buffer, currPlayer, 'B');
             Ref.teamB.membNum++;
             
 
@@ -211,16 +185,16 @@ void* AcceptNewPlayer(void* socketFD)
                 if(answer == 'Y')
                 {
                     Ref.teamB.members[Ref.teamB.membNum] = playerQueueB[viewedIndexB];
+                    sendMSG(sockFD, "Giocatore accettato\n"); read(sockFD, buffer, BUFFSIZE);
+                    sendTeamResponseByPipe(pipe_B[1], "1", "B", Ref.teamB.membNum);
                     Ref.teamB.membNum++;
-                    sendMSG(playerQueueB[viewedIndexB].playerFD, "Accettato nella squadra B");
-                    sendMSG(sockFD, "Giocatore accettato\n");
 
 
                 }
                 else if(answer == 'N')
                 {
-                    sendMSG(playerQueueB[viewedIndexB].playerFD, "Rifiutato dalla squadra B");
-                    sendMSG(sockFD, "Giocatore rifiutato\n");
+                    sendMSG(sockFD, "Giocatore rifiutato\n"); read(sockFD, buffer, BUFFSIZE);
+                    sendTeamResponseByPipe(pipe_B[1], "0", "B", Ref.teamB.membNum);
                 }
 
                 viewedIndexB++;
@@ -244,6 +218,8 @@ void* AcceptNewPlayer(void* socketFD)
             sendMSG(sockFD, "Creazione partita completata\n\n");
             read(sockFD, buffer, BUFFSIZE);
         }
+
+        close(pipe_A[1]); close(pipe_B[1]); 
 
         sendMSG(sockFD, "Crea il tuo giocatore!\n"); read(sockFD, buffer, BUFFSIZE);
         
@@ -295,14 +271,28 @@ void* AcceptNewPlayer(void* socketFD)
         {
             playerQueueA[addedIndexA] = tmpPlayer;
             addedIndexA = (addedIndexA+1)%QSIZE;
+            if( recvTeamResponseByPipe(pipe_A[0], Ref, currPlayer))
+                sendMSG(sockFD, "Accettato nella squadra A\n");
+            else
+                sendMSG(sockFD, "Rifiutato dalla squadra A\n");
         }
         else if(teamChoice == 2)
         {  
             playerQueueB[addedIndexB] = tmpPlayer;
             addedIndexB = (addedIndexB+1)%QSIZE;
+            if(recvTeamResponseByPipe(pipe_B[0], Ref, currPlayer))
+                sendMSG(sockFD, "Accettato nella squadra B\n");
+            else
+                sendMSG(sockFD, "Rifiutato dalla squadra B\n");
+
         }
 
         read(sockFD, buffer, BUFFSIZE);
+        setBuff(buffer, "");
+
+        
+
+        //R-T-P
 
 
         
@@ -319,6 +309,7 @@ int main()
     int wsock_fd, new_socket;
     int opt = 1;
     struct sockaddr_in servaddr, cliaddr;
+    createPipe(pipe_A); createPipe(pipe_B);
     InitReferee(&Ref);
     initTeam(&(Ref.teamA));
     initTeam(&(Ref.teamB));
