@@ -147,9 +147,32 @@ void* AcceptNewPlayer(void* socketFD)
             
 
             //capitano accetta giocatori
-            while(Ref.teamB.membNum < TEAMSIZE)
+            while(Ref.teamA.membNum < TEAMSIZE)
             {
-                while(addedIndexB == viewedIndexB);
+                while(addedIndexA == viewedIndexA);
+
+                sendMSG(sockFD, "Un giocatore ha richiesto di entrare nella tua squadra\n"); read(sockFD, buffer, BUFFSIZE);
+                setBuff(buffer, playerQueueA[viewedIndexA].name); strcat(buffer, ", lo vuoi accettare? (Y/N)\n");
+                askMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+                char answer = buffer[0];
+
+                if(answer == 'Y')
+                {
+                    Ref.teamA.members[Ref.teamA.membNum] = playerQueueA[viewedIndexA];
+                    Ref.teamA.membNum++;
+                    sendMSG(playerQueueA[viewedIndexA].playerFD, "Accettato nella squadra A");
+                    read(playerQueueA[viewedIndexA].playerFD, buffer, BUFFSIZE);
+                    sendMSG(sockFD, "Giocatore accettato\n"); read(sockFD, buffer, BUFFSIZE);
+
+
+                }
+                else if(answer == 'N')
+                {
+                    sendMSG(playerQueueA[viewedIndexA].playerFD, "Rifiutato dalla squadra A");
+                    sendMSG(sockFD, "Giocatore rifiutato\n");
+                }
+
+                viewedIndexA++;
 
 
 
@@ -188,13 +211,16 @@ void* AcceptNewPlayer(void* socketFD)
                 if(answer == 'Y')
                 {
                     Ref.teamB.members[Ref.teamB.membNum] = playerQueueB[viewedIndexB];
+                    Ref.teamB.membNum++;
                     sendMSG(playerQueueB[viewedIndexB].playerFD, "Accettato nella squadra B");
+                    sendMSG(sockFD, "Giocatore accettato\n");
 
 
                 }
                 else if(answer == 'N')
                 {
-
+                    sendMSG(playerQueueB[viewedIndexB].playerFD, "Rifiutato dalla squadra B");
+                    sendMSG(sockFD, "Giocatore rifiutato\n");
                 }
 
                 viewedIndexB++;
@@ -248,7 +274,7 @@ void* AcceptNewPlayer(void* socketFD)
         
         setBuff(buffer, "Nuovo giocatore: "); strcat(buffer, tmpPlayer.name);
         strcat(buffer, " con numero "); strcat(buffer, "7"); strcat(buffer, "\n");
-        //printf("%s", buffer);
+        printf("%s", buffer);
         sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE); 
 
             setBuff(buffer, "");
