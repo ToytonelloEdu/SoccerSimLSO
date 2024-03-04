@@ -7,7 +7,7 @@
 
 #define TEAMSIZE 5
 
-enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded};
+enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded, gameStarting, gameStarted, gameFinished};
 
 struct referee;
 struct team;
