@@ -268,12 +268,11 @@ void* AcceptNewPlayer(void* socketFD)
         initPlayer(&tmpPlayer, name, num, NULL);
         tmpPlayer.playerFD = sockFD;
         tmpPlayer.playerTID = syscall(__NR_gettid);
-        printPlayer(&tmpPlayer);
 
             setBuff(buffer, "");
         
         setBuff(buffer, "Nuovo giocatore: "); strcat(buffer, tmpPlayer.name);
-        strcat(buffer, " con numero "); strcat(buffer, "7"); strcat(buffer, "\n");
+        strcat(buffer, " con numero "); strcat(buffer, sNum); strcat(buffer, "\n");
         printf("%s", buffer);
         sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE); 
 
