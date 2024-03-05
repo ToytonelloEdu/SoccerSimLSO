@@ -307,7 +307,7 @@ void* AcceptNewPlayer(void* socketFD)
 
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     printf("Welcome to LSOccer Simulator's Server!\n");
 
@@ -315,9 +315,7 @@ int main()
     int opt = 1;
     struct sockaddr_in servaddr, cliaddr;
     createPipe(pipe_A); createPipe(pipe_B);
-    InitReferee(&Ref);
-    initTeam(&(Ref.teamA));
-    initTeam(&(Ref.teamB));
+    InitReferee(&Ref);initTeam(&(Ref.teamA));initTeam(&(Ref.teamB));
     
     if((wsock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -334,7 +332,9 @@ int main()
     memset(&cliaddr, 0, sizeof(cliaddr));
 
     servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = INADDR_ANY;
+    if(argc == 1) { servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); }
+    else if(argc == 2) { servaddr.sin_addr.s_addr = inet_addr(argv[1]); }
+    else { perror("Address"); exit(1); }
     servaddr.sin_port = htons(12345);
 
     if(bind(wsock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
