@@ -15,7 +15,7 @@
 
 #define BUFFSIZE 512
 
-int main()
+int main(int argc, char* argv[])
 {
     printf("Welcome to LSOccer Simulator's Client!\n");
 
@@ -31,9 +31,11 @@ int main()
     memset(&servaddr, 0, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
-    //servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    servaddr.sin_addr.s_addr = inet_addr("192.168.56.1");
     servaddr.sin_port = htons(12345);
+    if(argc == 1) { servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); }
+    else if(argc == 2) { servaddr.sin_addr.s_addr = inet_addr(argv[1]); }
+    else { perror("Address"); exit(1); }
+    
 
     int n;
     
