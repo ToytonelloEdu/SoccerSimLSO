@@ -332,10 +332,8 @@ int main(int argc, char* argv[])
     memset(&cliaddr, 0, sizeof(cliaddr));
 
     servaddr.sin_family = AF_INET;
-    if(argc == 1) { servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); }
-    else if(argc == 2) { servaddr.sin_addr.s_addr = inet_addr(argv[1]); }
-    else { perror("Address"); exit(1); }
     servaddr.sin_port = htons(12345);
+    servaddr.sin_addr.s_addr = INADDR_ANY;
 
     if(bind(wsock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
     {
@@ -343,15 +341,16 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
+    
     if(listen(wsock_fd, 10) < 0)
     {
         perror("listen error");
         exit(EXIT_FAILURE);
     }
 
+
     int addrlen = sizeof(cliaddr);
 
-    
 
     while((new_socket = accept(wsock_fd, (struct sockaddr*)&cliaddr, (socklen_t*)&addrlen)) > -1)
     {

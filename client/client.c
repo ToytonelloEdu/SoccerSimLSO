@@ -44,7 +44,6 @@ int main(int argc, char* argv[])
         perror("client");
         exit(EXIT_FAILURE);
     }
-    printf("Connesso\n");
 
     int rdout = 1;
     do
