@@ -333,7 +333,7 @@ int main(int argc, char* argv[])
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(12345);
-    servaddr.sin_addr.s_addr = INADDR_ANY;
+    servaddr.sin_addr.s_addr = inet_addr("172.18.0.1");
 
     if(bind(wsock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
     {
