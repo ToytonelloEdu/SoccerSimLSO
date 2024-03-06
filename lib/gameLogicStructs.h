@@ -5,7 +5,8 @@
 #include <pthread.h>
 #include <string.h>
 
-#define TEAMSIZE 5
+#define TEAMSIZE 2
+#define BUFFSIZE 512
 
 enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded, gameStarting, gameStarted, gameFinished};
 
@@ -19,8 +20,10 @@ struct stats;
         int playerFD;                   //file descriptor of socket of the player/client
         char* name;                     
         char shirtNumber; 
+        char team;
         char* teamName;
         pthread_t playerTID;           //id for thread managing of the player/client
+        int resumePlay;
     };
 
     void initPlayer(struct player* player, char* name, char shirtNum, char* team)
@@ -28,11 +31,20 @@ struct stats;
         player -> name = name;
         player -> shirtNumber = shirtNum;
         player -> teamName = team;
+        player->resumePlay = 0;
     }
 
     void printPlayer(struct player* player)
     {
         printf("\t(No %d) %s for team %s\n", player->shirtNumber, player->name, player->teamName);
+    }
+
+    void PlayerToString(char* buffer, struct player player)
+    {
+        char tmp[100] = "";
+        sprintf(tmp, "(No %d) %s for team %s\n", player.shirtNumber, player.name, player.teamName);
+        //if(strlen(tmp) <= sizeof(buffer))
+        strncpy(buffer, tmp, strlen(tmp));
     }
     
 
@@ -54,7 +66,8 @@ struct stats;
 
     struct stats                       //struct modeling the stats of the game
     {
-        int numberGoal;
+        int numberGoalA;
+        int numberGoalB;
         int shotFailed;
         int numberDribbling;
     };    
@@ -63,6 +76,7 @@ struct stats;
     {
         enum gameStatusEnum gameStatus;
         pthread_t lastThread;
+        pthread_t clockThread;
 
         struct team teamA; 
         struct team teamB;

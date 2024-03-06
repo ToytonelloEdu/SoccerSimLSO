@@ -21,9 +21,32 @@
 
 #define QSIZE 15
 
+int S = 1;
 struct referee Ref; int pipe_A[2]; int pipe_B[2];
 struct player playerQueueA[QSIZE]; short addedIndexA = 0, viewedIndexA = 0;
 struct player playerQueueB[QSIZE]; short addedIndexB = 0, viewedIndexB = 0;
+
+enum actions {eShot, eInjury, eDribbling};
+
+
+    void selectAction(struct player* player)
+    {
+        wait(&S);
+        
+        char buffer[BUFFSIZE] = "";
+        PlayerToString(buffer, *player);
+        int result = rand() % 3;
+
+        //printPlayer(player);
+        if (result == eShot ) { shot(&Ref, player, buffer); } 
+        if (result == eInjury ) { injury(&Ref, player, buffer); }
+        if (result == eDribbling ) { dribbling(&Ref, player, buffer); }
+
+        delay(7500);
+
+        signal(&S);
+        delay(200);
+    }
 
 void TeamCaptainInitialization(int sockFD, char buffer[], struct player* currPlayer, char team)
 {    
@@ -151,7 +174,9 @@ void* AcceptNewPlayer(void* socketFD)
             }
 
             sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
-            while(Ref.teamB.membNum < 5);
+            while(Ref.teamB.membNum < TEAMSIZE);
+
+            Ref.gameStatus = gameStarting;
 
     }
     else if(Ref.gameStatus == oneCaptainNeeded )
@@ -188,8 +213,6 @@ void* AcceptNewPlayer(void* socketFD)
                     sendMSG(sockFD, "Giocatore accettato\n"); read(sockFD, buffer, BUFFSIZE);
                     sendTeamResponseByPipe(pipe_B[1], "1", "B", Ref.teamB.membNum);
                     Ref.teamB.membNum++;
-
-
                 }
                 else if(answer == 'N')
                 {
@@ -202,7 +225,7 @@ void* AcceptNewPlayer(void* socketFD)
             }
 
             sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
-            while(Ref.teamA.membNum < 5);
+            while(Ref.teamA.membNum < TEAMSIZE);
     
     }
     else 
@@ -294,17 +317,38 @@ void* AcceptNewPlayer(void* socketFD)
 
         if(Ref.gameStatus < gameStarting)
         {
-            sendMSG(sockFD, "Squadre non al completo, attendi inizio partita");
+            sendMSG(sockFD, "Squadre non al completo, attendi inizio partita\n"); read(sockFD, buffer, BUFFSIZE);
             while(Ref.gameStatus != gameStarting);
         }
-        
-
-
-        
     }
 
+    printPlayer(currPlayer);
+    sendMSG(sockFD, "Tutto pronto: INIZIA LA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);    
+
+    while(Ref.time < 0);
+
+    while(Ref.time < DURATION)
+        selectAction(currPlayer);
 
 
+}
+
+void* MatchClockThread(void* arg)
+{
+    while(Ref.gameStatus != gameStarting);
+        delay(7500); int i = 0;
+        printf("Minute: 0\n");
+        Ref.gameStatus = gameStarted;
+        Ref.time = 0;
+        sendMinuteToAllClients(Ref);
+        while(Ref.time < DURATION)
+        {
+            printf("Minute: %d\n", ++Ref.time);
+            sendMinuteToAllClients(Ref);
+            sleep(2);
+        }
+
+        return 0;
 }
 
 int main(int argc, char* argv[])
@@ -314,8 +358,9 @@ int main(int argc, char* argv[])
     int wsock_fd, new_socket;
     int opt = 1;
     struct sockaddr_in servaddr, cliaddr;
-    createPipe(pipe_A); createPipe(pipe_B);
+    createPipe(pipe_A); createPipe(pipe_B); srand(time(NULL));
     InitReferee(&Ref);initTeam(&(Ref.teamA));initTeam(&(Ref.teamB));
+    pthread_create(& Ref.clockThread, NULL, MatchClockThread, NULL);
     
     if((wsock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -333,8 +378,8 @@ int main(int argc, char* argv[])
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(12345);
-    servaddr.sin_addr.s_addr = inet_addr("172.18.0.1");
-
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+    
     if(bind(wsock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
     {
         perror("Bind failed");

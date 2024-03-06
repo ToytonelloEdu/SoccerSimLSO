@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gcc -o server server.c
+gcc -fsanitize=address -o server server.c

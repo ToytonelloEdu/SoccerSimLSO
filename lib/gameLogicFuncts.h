@@ -8,11 +8,14 @@
 
 #include <time.h>
 #include "gameLogicStructs.h"
+#include "clientManagement.h"
 
-void shot(struct referee* Ref, struct player* player);
-void injury(struct referee* Ref, struct player* player);
-void dribbling(struct referee* Ref, struct player* player);
-void goal(struct referee* Ref, struct player* player);
+#define DURATION 90
+
+void dribbling(struct referee* Ref, struct player* player, char* msg);
+void shot(struct referee* Ref, struct player* player, char* msg);
+void goal(struct referee* Ref, struct player* player, char* msg);
+void injury(struct referee* Ref, struct player* player, char* msg);
 void addShotFailed(struct stats* stats);
 void addDribbling(struct stats* stats);
 typedef int ball;
@@ -36,38 +39,54 @@ typedef int ball;
         while(clock() < start + milliseconds){}
     }
 
-    void shot(struct referee* Ref, struct player* player)
-    {
-        int result = rand() % 2;    //0 GOAL -- 1 NO GOAL
-        printf("\tShot\n");
-        if (result == 0) 
-        { goal(Ref, player); } 
-        else
-        { addShotFailed(&(Ref -> stats)); }
-    }
-
-    void injury(struct referee* Ref, struct player* player)
-    {
-        printf("\tInjury\n");
-    }
-
-    void dribbling(struct referee* Ref, struct player* player)
+    void dribbling(struct referee* Ref, struct player* player, char* msg)
     {
         int result = rand() % 2;    //0 SUCCESS -- 1 FAILED
 
         addDribbling(&(Ref -> stats));
-        printf("\tDribbling\n");
+        strcat(msg, "\tDribbling\n");
 
-        if (result == 0) { shot(Ref, player); }
+        if (result == 0) 
+        { shot(Ref, player, msg); }
+        else 
+        {
+            printf("%s", msg);
+            //messaggio dribbling fallito
+        }
     }
 
-    void goal(struct referee* Ref, struct player* player)
+    void shot(struct referee* Ref, struct player* player, char* msg)
     {
-        Ref -> stats.numberGoal++;
+        int result = rand() % 2;    //0 GOAL -- 1 NO GOAL
+
+        strcat(msg, "\tShot\n");
+
+        if (result == 0) 
+            { goal(Ref, player, msg); } 
+        else
+            { 
+                addShotFailed(&(Ref -> stats)); 
+                printf("%s", msg);
+            }
+    }
+
+    void goal(struct referee* Ref, struct player* player, char* msg)
+    {
+        player->team == 'A'?Ref->stats.numberGoalA++ : Ref->stats.numberGoalB++;
         int FD = Ref -> logFD;
-        printf("\tGOAL\n");
+
+        sprintf(msg, "\tGOAL: %d-%d\n", Ref->stats.numberGoalA, Ref->stats.numberGoalB);
+        printf("%s", msg);
+        
 
     }
+
+    void injury(struct referee* Ref, struct player* player, char* msg)
+    {
+        printf("\tInjury\n");
+    }
+
+    
     
     void addDribbling(struct stats* stats) { stats -> numberDribbling++; }
     void addShotFailed(struct stats* stats) { stats -> shotFailed++; }
