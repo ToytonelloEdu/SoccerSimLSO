@@ -44,12 +44,13 @@ typedef int ball;
         int result = rand() % 2;    //0 SUCCESS -- 1 FAILED
 
         addDribbling(&(Ref -> stats));
-        strcat(msg, "\tDribbling\n");
+        strcat(msg, "\tDribbling");
 
         if (result == 0) 
         { shot(Ref, player, msg); }
         else 
         {
+            strcat(msg, " Failed\n");
             printf("%s", msg);
             //messaggio dribbling fallito
         }
@@ -66,6 +67,7 @@ typedef int ball;
         else
             { 
                 addShotFailed(&(Ref -> stats)); 
+                strcat(msg, " Failed\n");
                 printf("%s", msg);
             }
     }
