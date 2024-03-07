@@ -85,7 +85,7 @@ typedef int ball;
 
     void injury(struct referee* Ref, struct player* player, char* msg)
     {
-        printf("\tInjury\n");
+        printf("\t(No %d) %s: Injury\n", player->shirtNumber, player->name);
     }
 
     
