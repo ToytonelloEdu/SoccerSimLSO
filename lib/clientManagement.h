@@ -64,7 +64,7 @@ void sendTeamResponseByPipe(int pipeWrite, char* response, char* team, char posi
     write(pipeWrite, buffer, strlen(buffer));
 }
 
-int recvTeamResponseByPipe(int pipeRead, struct referee Ref, struct player* player)
+int recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** playerPTR)
 {
     char buffer[20];
 
@@ -76,18 +76,14 @@ int recvTeamResponseByPipe(int pipeRead, struct referee Ref, struct player* play
 
     if(buffer[2] == 'A') 
     {
-        player = & (Ref.teamA.members[pos]);
-        player->teamName = Ref.teamA.teamName;
+        *playerPTR = &(Ref->teamA.members[pos]);
+        setPlayerTeam(*playerPTR, 'A', Ref->teamA.teamName);
     }
-    else
-    if(buffer[2] == 'B')
+    else if(buffer[2] == 'B')
     {
-        player = & Ref.teamB.members[pos];
-        player->teamName = Ref.teamA.teamName;
+        *playerPTR = &(Ref->teamB.members[pos]);
+        setPlayerTeam(*playerPTR, 'B', Ref->teamB.teamName);
     }
-
-    player->team = buffer[2];
-        
     
 
     return 1;

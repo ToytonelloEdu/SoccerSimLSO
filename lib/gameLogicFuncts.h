@@ -10,7 +10,7 @@
 #include "gameLogicStructs.h"
 #include "clientManagement.h"
 
-#define DURATION 90
+#define DURATION 10
 
 void dribbling(struct referee* Ref, struct player* player, char* msg);
 void shot(struct referee* Ref, struct player* player, char* msg);
@@ -47,11 +47,12 @@ typedef int ball;
         strcat(msg, "\tDribbling");
 
         if (result == 0) 
-        { shot(Ref, player, msg); }
+        { strcat(msg, "\n"); shot(Ref, player, msg); }
         else 
         {
-            strcat(msg, " Failed\n");
+            strcat(msg, " failed\n");
             printf("%s", msg);
+            sendMSGtoAllClients(*Ref, msg);
             //messaggio dribbling fallito
         }
     }
@@ -60,32 +61,36 @@ typedef int ball;
     {
         int result = rand() % 2;    //0 GOAL -- 1 NO GOAL
 
-        strcat(msg, "\tShot\n");
+        strcat(msg, "\tShot");
 
         if (result == 0) 
-            { goal(Ref, player, msg); } 
+            { strcat(msg, "\n"); goal(Ref, player, msg); } 
         else
             { 
                 addShotFailed(&(Ref -> stats)); 
-                strcat(msg, " Failed\n");
+                strcat(msg, " failed\n");
                 printf("%s", msg);
+                sendMSGtoAllClients(*Ref, msg);
             }
     }
 
     void goal(struct referee* Ref, struct player* player, char* msg)
     {
-        player->team == 'A'?Ref->stats.numberGoalA++ : Ref->stats.numberGoalB++;
+        if(player->team == 'A') {Ref->stats.numberGoalA++;}
+        else if(player->team == 'B') {Ref->stats.numberGoalB++;}
+
         int FD = Ref -> logFD;
 
-        sprintf(msg, "\tGOAL: %d-%d\n", Ref->stats.numberGoalA, Ref->stats.numberGoalB);
+        sprintf(msg, "%s\tGOAL: %d-%d\n", msg, Ref->stats.numberGoalA, Ref->stats.numberGoalB);
         printf("%s", msg);
-        
-
+        sendMSGtoAllClients(*Ref, msg);
     }
 
     void injury(struct referee* Ref, struct player* player, char* msg)
     {
-        printf("\t(No %d) %s: Injury\n", player->shirtNumber, player->name);
+        strcat(msg, "\tInjury\n");
+        printf("%s", msg);
+        sendMSGtoAllClients(*Ref, msg);
     }
 
     

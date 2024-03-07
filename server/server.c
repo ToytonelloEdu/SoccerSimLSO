@@ -90,8 +90,8 @@ void TeamCaptainInitialization(int sockFD, char buffer[], struct player* currPla
         setBuff(buffer, "");
 
 
-    if (team == 'A') { initPlayer(currPlayer, name, num, Ref.teamA.teamName); }
-    if (team == 'B') { initPlayer(currPlayer, name, num, Ref.teamB.teamName); }
+    if (team == 'A') { initPlayer(currPlayer, name, num); setPlayerTeam(currPlayer, 'A', Ref.teamA.teamName);}
+    if (team == 'B') { initPlayer(currPlayer, name, num); setPlayerTeam(currPlayer, 'B', Ref.teamB.teamName);}
 
     currPlayer->playerFD = sockFD;
     currPlayer->playerTID = syscall(__NR_gettid);
@@ -118,7 +118,7 @@ void TeamCaptainInitialization(int sockFD, char buffer[], struct player* currPla
 void* AcceptNewPlayer(void* socketFD)
 {
     int sockFD = *((int*) socketFD);
-    struct player* currPlayer;
+    struct player* currPlayer = 0;
     char buffer[BUFFSIZE] = "";
     if(Ref.gameStatus == nogame)
     {
@@ -265,7 +265,7 @@ void* AcceptNewPlayer(void* socketFD)
             setBuff(buffer, "");
        
         
-        initPlayer(&tmpPlayer, name, num, NULL);
+        initPlayer(&tmpPlayer, name, num);
         tmpPlayer.playerFD = sockFD;
         tmpPlayer.playerTID = syscall(__NR_gettid);
 
@@ -295,7 +295,7 @@ void* AcceptNewPlayer(void* socketFD)
         {
             playerQueueA[addedIndexA] = tmpPlayer;
             addedIndexA = (addedIndexA+1)%QSIZE;
-            if( recvTeamResponseByPipe(pipe_A[0], Ref, currPlayer))
+            if( recvTeamResponseByPipe(pipe_A[0], &Ref, &currPlayer))
                 sendMSG(sockFD, "Accettato nella squadra A\n");
             else
                 sendMSG(sockFD, "Rifiutato dalla squadra A\n");
@@ -304,13 +304,12 @@ void* AcceptNewPlayer(void* socketFD)
         {  
             playerQueueB[addedIndexB] = tmpPlayer;
             addedIndexB = (addedIndexB+1)%QSIZE;
-            if(recvTeamResponseByPipe(pipe_B[0], Ref, currPlayer))
+            if(recvTeamResponseByPipe(pipe_B[0], &Ref, &currPlayer))
                 sendMSG(sockFD, "Accettato nella squadra B\n");
             else
                 sendMSG(sockFD, "Rifiutato dalla squadra B\n");
 
         }
-
 
         read(sockFD, buffer, BUFFSIZE);
         setBuff(buffer, "");
@@ -322,7 +321,7 @@ void* AcceptNewPlayer(void* socketFD)
         }
     }
 
-    printPlayer(currPlayer);
+    
     sendMSG(sockFD, "Tutto pronto: INIZIA LA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);    
 
     while(Ref.time < 0);
@@ -336,19 +335,29 @@ void* AcceptNewPlayer(void* socketFD)
 void* MatchClockThread(void* arg)
 {
     while(Ref.gameStatus != gameStarting);
-        delay(7500); int i = 0;
-        printf("Minute: 0\n");
-        Ref.gameStatus = gameStarted;
-        Ref.time = 0;
-        sendMinuteToAllClients(Ref);
-        while(Ref.time < DURATION)
-        {
+
+    printf("\nTutto pronto: INIZIA LA PARTITA\n\n");
+    delay(500); 
+    int i = 0; printf("Minute: 0\n");
+    Ref.gameStatus = gameStarted; Ref.time = 0;
+        
+    sendMinuteToAllClients(Ref);
+    while(Ref.time < DURATION)
+    {
             printf("Minute: %d\n", ++Ref.time);
             sendMinuteToAllClients(Ref);
             sleep(2);
-        }
+    }
 
-        return 0;
+    printf("Minuti di recupero\n");
+    sendMSGtoAllClients(Ref, "Minuti di recupero\n");
+
+    wait(&S);
+        char buffer[BUFFSIZE] = "";
+        sprintf(buffer, "\n\nPARTITA FINITA\n%s %d-%d %s\n", Ref.teamA.teamName, Ref.stats.numberGoalA, Ref.stats.numberGoalB, Ref.teamB.teamName);
+        printf("%s", buffer); sendMSGtoAllClients(Ref, buffer);
+    signal(&S);
+
 }
 
 int main(int argc, char* argv[])

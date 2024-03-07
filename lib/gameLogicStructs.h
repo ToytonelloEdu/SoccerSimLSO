@@ -2,11 +2,13 @@
 #ifndef GLSTRUCT
 #define GLSTRUCT
 
+#include <stdio.h>
 #include <pthread.h>
 #include <string.h>
 
 #define TEAMSIZE 2
 #define BUFFSIZE 512
+#define NAMESIZE 30
 
 enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded, gameStarting, gameStarted, gameFinished};
 
@@ -18,7 +20,7 @@ struct stats;
     struct player //struct modeling players/clients
     {
         int playerFD;                   //file descriptor of socket of the player/client
-        char* name;                     
+        char name[NAMESIZE];                     
         char shirtNumber; 
         char team;
         char* teamName;
@@ -26,12 +28,28 @@ struct stats;
         int resumePlay;
     };
 
-    void initPlayer(struct player* player, char* name, char shirtNum, char* team)
+    void initPlayer(struct player* player, char* name, char shirtNum)
     {
-        player -> name = name;
+        strncpy(player->name, name, NAMESIZE);
         player -> shirtNumber = shirtNum;
-        player -> teamName = team;
         player->resumePlay = 0;
+    }
+
+    void setPlayerTeam(struct player* player, char team, char* teamName)
+    {
+        player->team = team;
+        player->teamName = teamName;
+    }
+
+    void copyPlayer(struct player* dest, struct player src)
+    {
+        strncpy(dest->name, src.name, NAMESIZE);
+        dest->shirtNumber = src.shirtNumber;
+        dest->team = src.team;
+        dest->teamName = src.teamName;
+        dest->playerFD = src.playerFD;
+        dest->playerTID = src.playerTID;
+        dest->resumePlay = src.resumePlay;
     }
 
     void printPlayer(struct player* player)
@@ -42,7 +60,7 @@ struct stats;
     void PlayerToString(char* buffer, struct player player)
     {
         char tmp[100] = "";
-        sprintf(tmp, "(No %d) %s for team %s\n", player.shirtNumber, player.name, player.teamName);
+        sprintf(tmp, "\t(No %d) %s for team %s\n", player.shirtNumber, player.name, player.teamName);
         //if(strlen(tmp) <= sizeof(buffer))
         strncpy(buffer, tmp, strlen(tmp));
     }
@@ -50,7 +68,7 @@ struct stats;
 
     struct team                        //struct modeling a football team of 5 players
     {
-        char teamName[15];                
+        char teamName[NAMESIZE];                
         struct player members[TEAMSIZE];      
         struct player* captain;  
         char membNum;      
@@ -60,8 +78,8 @@ struct stats;
     {
         team->captain = &(team->members[0]);
         team->membNum = 0;
-        for(int i = 0; i < TEAMSIZE; i++)
-            team->members[i].teamName = team->teamName;
+        /* for(int i = 0; i < TEAMSIZE; i++)
+            team->members[i].teamName = team->teamName; */
     }
 
     struct stats                       //struct modeling the stats of the game
@@ -71,6 +89,11 @@ struct stats;
         int shotFailed;
         int numberDribbling;
     };    
+
+    void initStats(struct stats* stats)
+    {
+
+    }
 
     struct referee                     //struct modeling the referee of the game
     {
@@ -89,6 +112,7 @@ struct stats;
     {
         referee->gameStatus = nogame;
         referee->time = -1;
+        initStats(& referee->stats);
         
     }
 
