@@ -31,6 +31,7 @@ enum actions {eShot, eInjury, eDribbling};
 
     void selectAction(struct player* player)
     {
+        while(Ref.time < player->resumePlay);
         wait(&S);
         
         char buffer[BUFFSIZE] = "";

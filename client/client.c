@@ -15,6 +15,9 @@
 
 #define BUFFSIZE 512
 
+char* names[10] = {"Antonio", "Ciro", "Fortunato", "Matteo", "Luigi", "Donato", "Vincenzo", "Alessandro", "Francesco", "Arturo"};
+int numbers[10] = {35, 7, 9, 3, 11, 10, 24, 14, 18, 99};
+
 int main(int argc, char* argv[])
 {
     printf("Welcome to LSOccer Simulator's Client!\n");

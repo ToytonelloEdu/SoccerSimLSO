@@ -88,9 +88,10 @@ typedef int ball;
 
     void injury(struct referee* Ref, struct player* player, char* msg)
     {
-        strcat(msg, "\tInjury\n");
-        printf("%s", msg);
-        sendMSGtoAllClients(*Ref, msg);
+        int mins = rand() % 41 + 5;
+        player->resumePlay = Ref->time + mins;
+        sprintf(msg, "%s\tInjured until min. %d (for %d minutes)\n", msg, player->resumePlay, mins);
+        printf("%s", msg); sendMSGtoAllClients(*Ref, msg);
     }
 
     
