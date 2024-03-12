@@ -11,6 +11,8 @@
 #include "clientManagement.h"
 
 #define DURATION 10
+#define INJ_TIME_MOD 6
+#define INJ_TIME_BASE 5
 
 void dribbling(struct referee* Ref, struct player* player, char* msg);
 void shot(struct referee* Ref, struct player* player, char* msg);
@@ -88,9 +90,9 @@ typedef int ball;
 
     void injury(struct referee* Ref, struct player* player, char* msg)
     {
-        int mins = rand() % 41 + 5;
+        int mins = rand() % INJ_TIME_MOD + INJ_TIME_BASE;
         player->resumePlay = Ref->time + mins;
-        if(player->resumePlay <= 90){
+        if(player->resumePlay <= DURATION){
             sprintf(msg, "%s\tInjured until min. %d (for %d minutes)\n", msg, player->resumePlay, mins);
         } else {
             sprintf(msg, "%s\tInjured until end of the game.", msg);

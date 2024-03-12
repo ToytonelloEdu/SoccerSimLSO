@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/syscall.h>
+#include <fcntl.h>
 
 #include <time.h>
 #include <pthread.h>
@@ -17,6 +18,7 @@
 #include "../lib/gameLogicStructs.h"
 #include "../lib/gameLogicFuncts.h"
 #include "../lib/clientManagement.h"
+#include "../lib/serverManagement.h"
 
 
 #define QSIZE 15
@@ -338,7 +340,7 @@ void* AcceptNewPlayer(void* socketFD)
 void* MatchClockThread(void* arg)
 {
     while(Ref.gameStatus != gameStarting);
-    //crea fileLog qui
+    Ref.logFD = createNewLogFile();
     printf("\nTutto pronto: INIZIA LA PARTITA\n\n");
     delay(500); 
     int i = 0; printf("Minute: 0\n");

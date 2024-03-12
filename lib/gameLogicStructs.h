@@ -107,7 +107,7 @@ struct stats;
         struct team teamA; 
         struct team teamB;
         struct stats stats;
-        FILE* logFD;                     //file descriptor of the game log file
+        int logFD;                     //file descriptor of the game log file
         int time;
     };
 
