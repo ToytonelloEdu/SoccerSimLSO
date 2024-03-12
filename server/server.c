@@ -328,6 +328,7 @@ void* AcceptNewPlayer(void* socketFD)
 
     while(Ref.time < DURATION){
         while(Ref.time < currPlayer->resumePlay && Ref.gameStatus == gameStarted);
+
         selectAction(currPlayer);
     }
 
@@ -337,7 +338,7 @@ void* AcceptNewPlayer(void* socketFD)
 void* MatchClockThread(void* arg)
 {
     while(Ref.gameStatus != gameStarting);
-
+    //crea fileLog qui
     printf("\nTutto pronto: INIZIA LA PARTITA\n\n");
     delay(500); 
     int i = 0; printf("Minute: 0\n");
@@ -372,6 +373,8 @@ int main(int argc, char* argv[])
     createPipe(pipe_A); createPipe(pipe_B); srand(time(NULL));
     InitReferee(&Ref);initTeam(&(Ref.teamA));initTeam(&(Ref.teamB));
     pthread_create(& Ref.clockThread, NULL, MatchClockThread, NULL);
+    pthread_detach(Ref.clockThread);
+    pthread_setschedprio(Ref.clockThread, 10);
     
     if((wsock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
     {
