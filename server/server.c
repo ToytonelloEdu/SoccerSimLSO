@@ -31,7 +31,6 @@ enum actions {eShot, eInjury, eDribbling};
 
     void selectAction(struct player* player)
     {
-        while(Ref.time < player->resumePlay);
         wait(&S);
         
         char buffer[BUFFSIZE] = "";
@@ -327,8 +326,10 @@ void* AcceptNewPlayer(void* socketFD)
 
     while(Ref.time < 0);
 
-    while(Ref.time < DURATION)
+    while(Ref.time < DURATION){
+        while(Ref.time < currPlayer->resumePlay && Ref.gameStatus == gameStarted);
         selectAction(currPlayer);
+    }
 
 
 }

@@ -90,7 +90,11 @@ typedef int ball;
     {
         int mins = rand() % 41 + 5;
         player->resumePlay = Ref->time + mins;
-        sprintf(msg, "%s\tInjured until min. %d (for %d minutes)\n", msg, player->resumePlay, mins);
+        if(player->resumePlay <= 90){
+            sprintf(msg, "%s\tInjured until min. %d (for %d minutes)\n", msg, player->resumePlay, mins);
+        } else {
+            sprintf(msg, "%s\tInjured until end of the game.");
+        }
         printf("%s", msg); sendMSGtoAllClients(*Ref, msg);
     }
 
