@@ -92,7 +92,10 @@ struct stats;
 
     void initStats(struct stats* stats)
     {
-
+        stats->numberGoalA = 0;
+        stats->numberGoalB = 0;
+        stats->shotFailed = 0;
+        stats->numberDribbling = 0;
     }
 
     struct referee                     //struct modeling the referee of the game
@@ -104,7 +107,7 @@ struct stats;
         struct team teamA; 
         struct team teamB;
         struct stats stats;
-        int logFD;                     //file descriptor of the game log file
+        FILE* logFD;                     //file descriptor of the game log file
         int time;
     };
 
@@ -113,7 +116,7 @@ struct stats;
         referee->gameStatus = nogame;
         referee->time = -1;
         initStats(& referee->stats);
-        
+
     }
 
 #endif
