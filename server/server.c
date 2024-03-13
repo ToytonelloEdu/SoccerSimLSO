@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/syscall.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #include <time.h>
 #include <pthread.h>
@@ -335,6 +336,16 @@ void* AcceptNewPlayer(void* socketFD)
     }
 
 
+}
+
+int createNewLogFile()
+{
+    char path[100], buffer[26];
+    time_t hour;
+    time(&hour);
+    ctime_r(&hour, buffer);
+    sprintf(path, "./log/%s-logFile.txt", buffer);
+    return creat(path, S_IRUSR | S_IWUSR | S_IROTH);
 }
 
 void* MatchClockThread(void* arg)
