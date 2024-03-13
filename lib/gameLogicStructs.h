@@ -9,6 +9,7 @@
 #define TEAMSIZE 2
 #define BUFFSIZE 512
 #define NAMESIZE 30
+#define PATHSIZE 54
 
 enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded, gameStarting, gameStarted, gameFinished};
 
@@ -108,7 +109,8 @@ struct stats;
         struct team teamB;
         struct stats stats;
         int logFD;                    //file descriptor of the game log file
-        char* pathLog;
+        char pathLogLib[PATHSIZE];
+        char pathLogServer[PATHSIZE];
         int time;
     };
 
