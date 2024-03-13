@@ -345,6 +345,7 @@ int createNewLogFile()
     time(&hour);
     ctime_r(&hour, buffer);
     sprintf(path, "./log/%s-logFile.txt", buffer);
+    Ref.pathLog = buffer;
     return creat(path, S_IRUSR | S_IWUSR | S_IROTH);
 }
 

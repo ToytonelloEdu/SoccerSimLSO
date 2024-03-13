@@ -78,14 +78,20 @@ typedef int ball;
 
     void goal(struct referee* Ref, struct player* player, char* msg)
     {
+        sprintf(Ref->pathLog, "../server/log/%s-logFile.txt", Ref->pathLog);
+        printf("---------------\n%s\n---------------", Ref->pathLog);
+        FILE* fps = fopen(Ref->pathLog, "w");
+
         if(player->team == 'A') {Ref->stats.numberGoalA++;}
         else if(player->team == 'B') {Ref->stats.numberGoalB++;}
 
-        int FD = Ref -> logFD;
+        //int FD = Ref -> logFD;
 
         sprintf(msg, "%s\tGOAL: %d-%d\n", msg, Ref->stats.numberGoalA, Ref->stats.numberGoalB);
         printf("%s", msg);
+        fwrite(msg, sizeof(char), strlen(msg), fps);
         sendMSGtoAllClients(*Ref, msg);
+        fclose(fps);
     }
 
     void injury(struct referee* Ref, struct player* player, char* msg)
