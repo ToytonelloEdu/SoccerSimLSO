@@ -1,0 +1,83 @@
+Minute: 0
+Minute: 1
+	(No 15) Lorenzo for team NAPOLI
+	Dribbling failed
+	(No 5) Davide for team INTER
+	Dribbling failed
+Minute: 2
+	(No 9) Lautaro for team INTER
+	Injured until min. 10 (for 8 minutes)
+	(No 8) KekkoP for team INTER
+	Shot
+	GOAL: 0-1
+	(No 10) Ciro for team NAPOLI
+	Shot failed
+Minute: 3
+	(No 10) Thuram for team INTER
+	Injured until end of the game.	(No 15) Lorenzo for team NAPOLI
+	Dribbling failed
+	(No 66) Marco for team NAPOLI
+	Injured until min. 10 (for 7 minutes)
+Minute: 4
+	(No 7) Fortunato for team NAPOLI
+	Shot
+	GOAL: 1-1
+	(No 23) Di Marco for team INTER
+	Dribbling
+	Shot
+	GOAL: 1-2
+	(No 5) Davide for team INTER
+	Shot
+	GOAL: 1-3
+Minute: 5
+	(No 15) Lorenzo for team NAPOLI
+	Dribbling
+	Shot
+	GOAL: 3-3
+	(No 8) KekkoP for team INTER
+	Shot failed
+Minute: 6
+	(No 10) Ciro for team NAPOLI
+	Shot
+	GOAL: 2-3
+	(No 23) Di Marco for team INTER
+	Shot
+	GOAL: 3-4
+	(No 5) Davide for team INTER
+	Shot
+	GOAL: 3-5
+	(No 15) Lorenzo for team NAPOLI
+	Dribbling failed
+Minute: 7
+	(No 8) KekkoP for team INTER
+	Shot
+	GOAL: 3-6
+	(No 12) Peppe for team NAPOLI
+	Dribbling failed
+Minute: 8
+	(No 10) Ciro for team NAPOLI
+	Injured until end of the game.	(No 23) Di Marco for team INTER
+	Dribbling
+	Shot failed
+	(No 15) Lorenzo for team NAPOLI
+	Dribbling failed
+Minute: 9
+	(No 5) Davide for team INTER
+	Injured until end of the game.	(No 8) KekkoP for team INTER
+	Shot failed
+	(No 23) Di Marco for team INTER
+	Shot
+	GOAL: 3-7
+Minute: 10
+	(No 12) Peppe for team NAPOLI
+	Shot failed
+	(No 7) Fortunato for team NAPOLI
+	Dribbling failed
+	(No 9) Lautaro for team INTER
+	Dribbling failed
+	(No 15) Lorenzo for team NAPOLI
+	Shot
+	GOAL: 4-7
+Minuti di recupero
+	(No 66) Marco for team NAPOLI
+	Injured until end of the game.

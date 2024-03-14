@@ -1,0 +1,72 @@
+Minute: 0
+	(No 68) Lobotka for team NAPOLI
+	Shot failed
+	(No 30) Acerbi for team INTER
+	Shot
+	GOAL: 0-1
+	(No 8) Arnautovic for team INTER
+	Shot failed
+Minute: 1
+	(No 22) Di Lorenzo for team NAPOLI
+	Injured until min. 7 (for 7 minutes)
+	(No 9) Osimhen for team NAPOLI
+	Shot failed
+	(No 77) Kvarathskelia for team NAPOLI
+	Dribbling
+	Shot
+	GOAL: 1-1
+	(No 9) Lautaro for team INTER
+	Dribbling
+	Shot
+	GOAL: 2-2
+Minute: 2
+	(No 10) Thuram for team INTER
+	Injured until min. 10 (for 9 minutes)
+	(No 21) Politano for team NAPOLI
+	Shot
+	GOAL: 2-1
+	(No 30) Acerbi for team INTER
+	Shot
+	GOAL: 2-4
+	(No 8) Arnautovic for team INTER
+	Shot
+	GOAL: 2-3
+	(No 9) Osimhen for team NAPOLI
+	Shot
+	GOAL: 3-5
+	(No 21) Politano for team NAPOLI
+	Dribbling failed
+	(No 68) Lobotka for team NAPOLI
+	Shot failed
+	(No 9) Lautaro for team INTER
+	Injured until end of the game.
+	(No 30) Acerbi for team INTER
+	Shot
+	GOAL: 4-6
+	(No 8) Arnautovic for team INTER
+	Shot failed
+	(No 9) Osimhen for team NAPOLI
+	Dribbling failed
+	(No 20) Chalanoglu for team INTER
+	Shot
+	GOAL: 2-5
+	(No 30) Acerbi for team INTER
+	Injured until min. 8 (for 6 minutes)
+	(No 8) Arnautovic for team INTER
+	Injured until end of the game.
+Minute: 3
+	(No 9) Osimhen for team NAPOLI
+	Shot
+	GOAL: 7-6
+	(No 20) Chalanoglu for team INTER
+	Shot
+	GOAL: 7-7
+	(No 9) Osimhen for team NAPOLI
+	Injured until end of the game.
+	(No 68) Lobotka for team NAPOLI
+	Shot
+	GOAL: 6-6
+Minute: 4
+	(No 77) Kvarathskelia for team NAPOLI
+	Shot
+	GOAL: 4-5

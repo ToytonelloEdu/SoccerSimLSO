@@ -29,7 +29,7 @@ struct referee Ref; int pipe_A[2]; int pipe_B[2];
 struct player playerQueueA[QSIZE]; short addedIndexA = 0, viewedIndexA = 0;
 struct player playerQueueB[QSIZE]; short addedIndexB = 0, viewedIndexB = 0;
 
-enum actions {eShot, eInjury, eDribbling};
+enum actions {eShot, eDribbling, eInjury};
 
     void selectAction(struct player* player)
     {
@@ -40,8 +40,8 @@ enum actions {eShot, eInjury, eDribbling};
         int result = rand() % 3;
 
         if (result == eShot ) { shot(&Ref, player, buffer); } 
-        if (result == eInjury ) { /*injury(&Ref, player, buffer);*/ }
         if (result == eDribbling ) { dribbling(&Ref, player, buffer); }
+        if (result == eInjury ) { injury(&Ref, player, buffer); }
 
         delay(7500);
 
@@ -327,9 +327,11 @@ enum actions {eShot, eInjury, eDribbling};
         while(Ref.time < 0);
 
         while(Ref.time < DURATION){
-            while(Ref.time < currPlayer->resumePlay && Ref.gameStatus == gameStarted);
-
-            selectAction(currPlayer);
+            if (currPlayer -> resumePlay <= DURATION)
+            {
+                while(Ref.time < currPlayer->resumePlay && Ref.gameStatus == gameStarted);
+                selectAction(currPlayer);
+            }
         }
     }
 

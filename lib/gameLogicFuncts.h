@@ -97,7 +97,7 @@ typedef int ball;
         if(player->resumePlay <= DURATION){
             sprintf(msg, "%s\tInjured until min. %d (for %d minutes)\n", msg, player->resumePlay, mins);
         } else {
-            sprintf(msg, "%s\tInjured until end of the game.", msg);
+            sprintf(msg, "%s\tInjured until end of the game.\n", msg);
         }
         printf("%s", msg); sendMSGtoAllClients(*Ref, msg);
         writeLog(Ref->pathLogLib, msg);
