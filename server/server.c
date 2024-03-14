@@ -335,22 +335,20 @@ enum actions {eShot, eInjury, eDribbling};
 
     void printStatsOfMAtch()
     {
-        FILE* fps = fopen(Ref.pathLogLib, "a");
         char msg[BUFFSIZE] = "";
         int totalGoal = Ref.stats.numberGoalA + Ref.stats.numberGoalB;
         
         sprintf(msg, "GOAL segnati nel match: %d\n", totalGoal);
-        fwrite(msg, sizeof(char), strlen(msg), fps);
+        writeLog(Ref.pathLogServer, msg);
         setBuff(msg, "");
         
         sprintf(msg, "SHOT falliti nel match: %d\n", Ref.stats.shotFailed);
-        fwrite(msg, sizeof(char), strlen(msg), fps);
+        writeLog(Ref.pathLogServer, msg);
         setBuff(msg, "");
 
         sprintf(msg, "DRIBBLING effettuati nel match: %d\n", Ref.stats.numberDribbling);
-        fwrite(msg, sizeof(char), strlen(msg), fps);
+        writeLog(Ref.pathLogServer, msg);
         setBuff(msg, "");
-        fclose(fps);
     }
 
     int createNewLogFile()
@@ -372,8 +370,6 @@ enum actions {eShot, eInjury, eDribbling};
     {
         while(Ref.gameStatus != gameStarting);
         Ref.logFD = createNewLogFile();
-        
-        // FILE* fps = fopen(Ref.pathLogServer, "a");
 
         printf("\nTutto pronto: INIZIA LA PARTITA\n\n");
         delay(500);
@@ -382,7 +378,7 @@ enum actions {eShot, eInjury, eDribbling};
         int i = 0; 
         char tmpBuff[BUFFSIZE] = "";
         sprintf(tmpBuff, "Minute: 0\n");
-        // fwrite(tmpBuff, sizeof(char), strlen(tmpBuff), fps);
+        writeLog(Ref.pathLogServer, tmpBuff);
         setBuff(tmpBuff, "");
         Ref.gameStatus = gameStarted; Ref.time = 0;
             
@@ -391,7 +387,7 @@ enum actions {eShot, eInjury, eDribbling};
         {
             printf("Minute: %d\n", ++Ref.time);
             sprintf(tmpBuff, "Minute: %d\n", Ref.time);
-            // fwrite(tmpBuff, sizeof(char), strlen(tmpBuff), fps);
+            writeLog(Ref.pathLogServer, tmpBuff);
             setBuff(tmpBuff, "");
             sendMinuteToAllClients(Ref);
             sleep(2);
@@ -399,7 +395,7 @@ enum actions {eShot, eInjury, eDribbling};
 
         printf("Minuti di recupero\n");
         sprintf(tmpBuff, "Minuti di recupero\n");
-        // fwrite(tmpBuff, sizeof(char), strlen(tmpBuff), fps);
+        writeLog(Ref.pathLogServer, tmpBuff);
         setBuff(tmpBuff, "");
         sendMSGtoAllClients(Ref, "Minuti di recupero\n");
 
@@ -409,7 +405,6 @@ enum actions {eShot, eInjury, eDribbling};
             printf("%s", buffer); sendMSGtoAllClients(Ref, buffer);
             printStatsOfMAtch();            
         signal(&S);
-        // fclose(fps);
     }
 
     int main(int argc, char* argv[])

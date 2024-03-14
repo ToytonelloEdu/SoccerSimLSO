@@ -20,6 +20,7 @@ void goal(struct referee* Ref, struct player* player, char* msg);
 void injury(struct referee* Ref, struct player* player, char* msg);
 void addShotFailed(struct stats* stats);
 void addDribbling(struct stats* stats);
+void writeLog(char* path, char* msg);
 typedef int ball;
 
     void wait(ball* mutex)
@@ -43,71 +44,70 @@ typedef int ball;
 
     void dribbling(struct referee* Ref, struct player* player, char* msg)
     {
-        FILE* fps = fopen(Ref->pathLogLib, "a");
-            int result = rand() % 2;    //0 SUCCESS -- 1 FAILED
+        int result = rand() % 2;    //0 SUCCESS -- 1 FAILED
 
-            addDribbling(&(Ref -> stats));
-            strcat(msg, "\tDribbling");
+        addDribbling(&(Ref -> stats));
+        strcat(msg, "\tDribbling");
 
-            if (result == 0) 
-            { strcat(msg, "\n"); shot(Ref, player, msg); }
-            else 
-            {
-                strcat(msg, " failed\n");
-                printf("%s", msg);
-                sendMSGtoAllClients(*Ref, msg);
-                fwrite(msg, sizeof(char), strlen(msg), fps);
-            }
-        fclose(fps);
+        if (result == 0) 
+        { strcat(msg, "\n"); shot(Ref, player, msg); }
+        else 
+        {
+            strcat(msg, " failed\n");
+            printf("%s", msg);
+            sendMSGtoAllClients(*Ref, msg);
+            writeLog(Ref->pathLogLib, msg);
+        }
     }
 
     void shot(struct referee* Ref, struct player* player, char* msg)
     {
-        FILE* fps = fopen(Ref->pathLogLib, "a");
-            int result = rand() % 2;    //0 GOAL -- 1 NO GOAL
+        int result = rand() % 2;    //0 GOAL -- 1 NO GOAL
 
-            strcat(msg, "\tShot");
+        strcat(msg, "\tShot");
 
-            if (result == 0) 
-                { strcat(msg, "\n"); goal(Ref, player, msg); } 
-            else
-            { 
-                addShotFailed(&(Ref -> stats)); 
-                strcat(msg, " failed\n");
-                printf("%s", msg);
-                sendMSGtoAllClients(*Ref, msg);
-                fwrite(msg, sizeof(char), strlen(msg), fps);
-            }
-        fclose(fps);
+        if (result == 0) 
+            { strcat(msg, "\n"); goal(Ref, player, msg); } 
+        else
+        { 
+            addShotFailed(&(Ref -> stats)); 
+            strcat(msg, " failed\n");
+            printf("%s", msg);
+            sendMSGtoAllClients(*Ref, msg);
+            writeLog(Ref->pathLogLib, msg);
+        }
     }
 
     void goal(struct referee* Ref, struct player* player, char* msg)
     {
-        FILE* fps = fopen(Ref->pathLogLib, "a");
-            if(player->team == 'A') {Ref->stats.numberGoalA++;}
-            else if(player->team == 'B') {Ref->stats.numberGoalB++;}
+        if(player->team == 'A') {Ref->stats.numberGoalA++;}
+        else if(player->team == 'B') {Ref->stats.numberGoalB++;}
 
-            sprintf(msg, "%s\tGOAL: %d-%d\n", msg, Ref->stats.numberGoalA, Ref->stats.numberGoalB);
-            printf("%s", msg);
-            sendMSGtoAllClients(*Ref, msg);
-            
-            fwrite(msg, sizeof(char), strlen(msg), fps);
-        fclose(fps);
+        sprintf(msg, "%s\tGOAL: %d-%d\n", msg, Ref->stats.numberGoalA, Ref->stats.numberGoalB);
+        printf("%s", msg);
+        sendMSGtoAllClients(*Ref, msg);
+        
+        writeLog(Ref->pathLogLib, msg);
     }
 
     void injury(struct referee* Ref, struct player* player, char* msg)
     {
-        FILE* fps = fopen(Ref->pathLogLib, "a");
-            int mins = rand() % INJ_TIME_MOD + INJ_TIME_BASE;
-            player->resumePlay = Ref->time + mins;
-            if(player->resumePlay <= DURATION){
-                sprintf(msg, "%s\tInjured until min. %d (for %d minutes)\n", msg, player->resumePlay, mins);
-            } else {
-                sprintf(msg, "%s\tInjured until end of the game.", msg);
-            }
-            printf("%s", msg); sendMSGtoAllClients(*Ref, msg);
-            fwrite(msg, sizeof(char), strlen(msg), fps);
-        fclose(fps);
+        int mins = rand() % INJ_TIME_MOD + INJ_TIME_BASE;
+        player->resumePlay = Ref->time + mins;
+        if(player->resumePlay <= DURATION){
+            sprintf(msg, "%s\tInjured until min. %d (for %d minutes)\n", msg, player->resumePlay, mins);
+        } else {
+            sprintf(msg, "%s\tInjured until end of the game.", msg);
+        }
+        printf("%s", msg); sendMSGtoAllClients(*Ref, msg);
+        writeLog(Ref->pathLogLib, msg);
+    }
+
+    void writeLog(char* path, char* msg)
+    {
+        FILE* fp = fopen(path, "a");
+        fwrite(msg, sizeof(char), strlen(msg), fp);
+        fclose(fp);
     }
     
     void addDribbling(struct stats* stats) { stats -> numberDribbling++; }
