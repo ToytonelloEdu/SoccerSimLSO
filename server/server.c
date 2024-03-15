@@ -24,8 +24,6 @@
 int S = 1;
 struct referee Ref; int pipe_A[2]; int pipe_B[2];
 struct playerQueue QueueA = {0,0}, QueueB = {0,0};
-struct player playerQueueA[QSIZE]; short addedIndexA = 0, viewedIndexA = 0;
-struct player playerQueueB[QSIZE]; short addedIndexB = 0, viewedIndexB = 0;
 
 enum actions {eShot, eDribbling, eInjury};
 
@@ -52,6 +50,7 @@ enum actions {eShot, eDribbling, eInjury};
         int sockFD = *((int*) socketFD);
         struct player* currPlayer = 0;
         char buffer[BUFFSIZE] = "";
+
         if(Ref.gameStatus == nogame)
         {
             Ref.gameStatus = oneCaptainNeeded;
@@ -71,38 +70,13 @@ enum actions {eShot, eDribbling, eInjury};
                 sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
                 
                 //capitano accetta giocatori
-                while(Ref.teamA.membNum < TEAMSIZE)
-                {
-                    while(addedIndexA == viewedIndexA);
-
-                    sendMSG(sockFD, "Un giocatore ha richiesto di entrare nella tua squadra\n"); read(sockFD, buffer, BUFFSIZE);
-                    setBuff(buffer, playerQueueA[viewedIndexA].name); strcat(buffer, ", lo vuoi accettare? (Y/N)\n");
-                    askMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
-                    char answer = buffer[0];
-
-                    if(answer == 'Y')
-                    {
-                        Ref.teamA.members[Ref.teamA.membNum] = playerQueueA[viewedIndexA];
-                        sendMSG(sockFD, "Giocatore accettato\n"); read(sockFD, buffer, BUFFSIZE);
-                        sendTeamResponseByPipe(pipe_A[1], "1", "A", Ref.teamA.membNum);
-                        Ref.teamA.membNum++;
-                    }
-                    else if(answer == 'N')
-                    {
-                        sendMSG(sockFD, "Giocatore rifiutato\n"); read(sockFD, buffer, BUFFSIZE);
-                        sendTeamResponseByPipe(pipe_A[1], "0", "A", Ref.teamA.membNum);
-                    }
-
-                    viewedIndexA++;
-
-
-                }
-                //TeamMemberAcceptance(sockFD, buffer, & Ref.teamA, "A", & QueueA, pipe_A[1]);
+            
+                TeamMemberAcceptance(sockFD, buffer, & Ref.teamA, "A", & QueueA, pipe_A[1]);
 
                 sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
                 while(Ref.teamB.membNum < TEAMSIZE);
 
-                Ref.gameStatus = gameStarting;
+            Ref.gameStatus = gameStarting;
 
         }
         else if(Ref.gameStatus == oneCaptainNeeded )
@@ -124,34 +98,12 @@ enum actions {eShot, eDribbling, eInjury};
                     setBuff(buffer, "");
 
                 //capitano accetta giocatori
-                while(Ref.teamB.membNum < TEAMSIZE)
-                {
-                    while(addedIndexB == viewedIndexB);
-
-                    sendMSG(sockFD, "Un giocatore ha richiesto di entrare nella tua squadra\n"); read(sockFD, buffer, BUFFSIZE);
-                    setBuff(buffer, playerQueueB[viewedIndexB].name); strcat(buffer, ", lo vuoi accettare? (Y/N)\n");
-                    askMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
-                    char answer = buffer[0];
-
-                    if(answer == 'Y')
-                    {
-                        Ref.teamB.members[Ref.teamB.membNum] = playerQueueB[viewedIndexB];
-                        sendMSG(sockFD, "Giocatore accettato\n"); read(sockFD, buffer, BUFFSIZE);
-                        sendTeamResponseByPipe(pipe_B[1], "1", "B", Ref.teamB.membNum);
-                        Ref.teamB.membNum++;
-                    }
-                    else if(answer == 'N')
-                    {
-                        sendMSG(sockFD, "Giocatore rifiutato\n"); read(sockFD, buffer, BUFFSIZE);
-                        sendTeamResponseByPipe(pipe_B[1], "0", "B", Ref.teamB.membNum);
-                    }
-
-                    viewedIndexB++;
-
-                }
+                
+                TeamMemberAcceptance(sockFD, buffer, & Ref.teamB, "B", & QueueB, pipe_B[1]);
 
                 sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
-                while(Ref.teamA.membNum < TEAMSIZE);
+                
+            while(Ref.teamA.membNum < TEAMSIZE);
         
         }
         else 
@@ -206,39 +158,19 @@ enum actions {eShot, eDribbling, eInjury};
 
             //nuovo giocatore si pone in coda per entrare in una squadra
             
-            setBuff(buffer, "1-> "); strcat(buffer, Ref.teamA.teamName);
-            strcat(buffer, "; 2-> "); strcat(buffer, Ref.teamB.teamName);
-            strcat(buffer, "\n"); sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
-
-            setBuff(buffer, "");
-
-            
-            askMSG(sockFD, "Decidi di che squadra far parte: "); 
-            read(sockFD, ansBuff, BUFFSIZE);
-            char teamChoice = atoi(ansBuff);
-
-            if(teamChoice == 1)
+            switch (TeamRequestChoice(sockFD, buffer, & Ref))
             {
-                playerQueueA[addedIndexA] = tmpPlayer;
-                addedIndexA = (addedIndexA+1)%QSIZE;
-                if( recvTeamResponseByPipe(pipe_A[0], &Ref, &currPlayer))
-                    sendMSG(sockFD, "Accettato nella squadra A\n");
-                else
-                    sendMSG(sockFD, "Rifiutato dalla squadra A\n");
+            case 1 :
+                TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueA, pipe_A[0]);
+                break;
+            
+            case 2:
+                TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueB, pipe_B[0]);
+                break;
+            default:
+                sendErrorMSG();
+                break;
             }
-            else if(teamChoice == 2)
-            {  
-                playerQueueB[addedIndexB] = tmpPlayer;
-                addedIndexB = (addedIndexB+1)%QSIZE;
-                if(recvTeamResponseByPipe(pipe_B[0], &Ref, &currPlayer))
-                    sendMSG(sockFD, "Accettato nella squadra B\n");
-                else
-                    sendMSG(sockFD, "Rifiutato dalla squadra B\n");
-
-            }
-
-            read(sockFD, buffer, BUFFSIZE);
-            setBuff(buffer, "");
 
             if(Ref.gameStatus < gameStarting)
             {

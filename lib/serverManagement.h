@@ -41,6 +41,10 @@ void qInsert(struct playerQueue* q, struct player* newPlayer)
 void writeLog(char* path, char* msg);
 void printStatsOfMAtch(struct referee Ref);
 void TeamCaptainInitialization(int sockFD, char buffer[], struct referee* Ref, struct player* currPlayer, char team);
+
+char TeamRequestChoice(int sockFD, char buffer[], struct referee* Ref);
+struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player* newPlayer,struct playerQueue* Queue, int pipeRead);
+
 void TeamMemberAcceptance(int sockFD, char buffer[], struct team* Team, char* teamStr , struct playerQueue* Queue, int pipeWrite);
 
 void writeLog(char* path, char* msg)
@@ -165,7 +169,7 @@ void printStatsOfMAtch(struct referee Ref)
         }
     }
 
-    char TeamRequestChoice(int sockFD, char* buffer, struct referee* Ref)
+    char TeamRequestChoice(int sockFD, char buffer[], struct referee* Ref)
     {
         char ansBuff[BUFFSIZE];
         setBuff(buffer, "1-> "); strcat(buffer, Ref->teamA.teamName);
@@ -194,6 +198,8 @@ void printStatsOfMAtch(struct referee Ref)
 
 
             setBuff(buffer, "");
+
+            return retPlayerPTR;
     }
 
 #endif
