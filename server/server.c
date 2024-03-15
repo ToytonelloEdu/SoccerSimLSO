@@ -21,11 +21,9 @@
 #include "../lib/clientManagement.h"
 #include "../lib/serverManagement.h"
 
-
-#define QSIZE 15
-
 int S = 1;
 struct referee Ref; int pipe_A[2]; int pipe_B[2];
+struct playerQueue QueueA = {0,0}, QueueB = {0,0};
 struct player playerQueueA[QSIZE]; short addedIndexA = 0, viewedIndexA = 0;
 struct player playerQueueB[QSIZE]; short addedIndexB = 0, viewedIndexB = 0;
 
@@ -43,78 +41,11 @@ enum actions {eShot, eDribbling, eInjury};
         if (result == eDribbling ) { dribbling(&Ref, player, buffer); }
         if (result == eInjury ) { injury(&Ref, player, buffer); }
 
-        delay(7500);
+        delay(15000);
 
         signal(&S);
-        delay(200);
+        delay(500);
     }
-
-    void TeamCaptainInitialization(int sockFD, char buffer[], struct player* currPlayer, char team)
-    {    
-
-        if (team == 'A')
-        {
-            setBuff(buffer, "Sei il capitano della squadra A\n");
-            sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
-            
-                setBuff(buffer, "");
-
-            askMSG(sockFD, "Inserisci nome Squadra A: "); 
-            read(sockFD, buffer, BUFFSIZE); strcpy_noNL(Ref.teamA.teamName, buffer);
-            printf("Il primo team è %s\n", Ref.teamA.teamName);     
-        }
-
-        if (team == 'B')
-        {
-            setBuff(buffer, "Sei il capitano della squadra B\n");
-            sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
-            
-                setBuff(buffer, "");
-
-            askMSG(sockFD, "Inserisci nome Squadra B: ");
-            read(sockFD, buffer, BUFFSIZE); strcpy_noNL(Ref.teamB.teamName, buffer);
-            printf("Il secondo team è %s\n", Ref.teamB.teamName);
-        }
-
-            setBuff(buffer, "");
-
-        askMSG(sockFD, "Inserisci il tuo nome: ");
-        read(sockFD, buffer, BUFFSIZE);
-        char name[50]; strcpy_noNL(name, buffer);
-
-            setBuff(buffer, "");
-
-        askMSG(sockFD, "Inserisci il tuo numero di maglia: ");
-        read(sockFD, buffer, BUFFSIZE); int num = atoi(buffer);
-        char sNum[3]; strcpy_noNL(sNum, buffer); 
-
-            setBuff(buffer, "");
-
-
-        if (team == 'A') { initPlayer(currPlayer, name, num); setPlayerTeam(currPlayer, 'A', Ref.teamA.teamName);}
-        if (team == 'B') { initPlayer(currPlayer, name, num); setPlayerTeam(currPlayer, 'B', Ref.teamB.teamName);}
-
-        currPlayer->playerFD = sockFD;
-        currPlayer->playerTID = syscall(__NR_gettid);
-
-
-        setBuff(buffer, "Il capitano della squadra "); strcat(buffer, currPlayer->teamName);
-        strcat(buffer, " è "); strcat(buffer, currPlayer->name);
-        strcat(buffer, " con numero "); strcat(buffer, sNum); strcat(buffer, "\n");
-        
-        sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
-        printf("%s", buffer);
-
-            setBuff(buffer, "");
-
-        
-
-        while(Ref.gameStatus == oneCaptainNeeded);
-        Ref.gameStatus--;
-
-        while(Ref.gameStatus != gameCreated);
-    }
-
 
     void* AcceptNewPlayer(void* socketFD)
     {
@@ -127,25 +58,18 @@ enum actions {eShot, eDribbling, eInjury};
 
                 currPlayer = Ref.teamA.captain;
 
-
                 sendMSG(sockFD, "Inizio creazione partita\n\n"); read(sockFD, buffer, BUFFSIZE);
-                setBuff(buffer, "");
-
-                TeamCaptainInitialization(sockFD, buffer, currPlayer, 'A');
+                    setBuff(buffer, "");
+                TeamCaptainInitialization(sockFD, buffer,&Ref, currPlayer, 'A');
                 Ref.teamA.membNum++;
-
 
                 setBuff(buffer, "La partita è ");strcat(buffer, Ref.teamA.teamName);
                 strcat(buffer, "-");
                 strcat(buffer, Ref.teamB.teamName);strcat(buffer, "\n");
                 
-                
                 printf("%s", buffer);
                 sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
                 
-                
-                
-
                 //capitano accetta giocatori
                 while(Ref.teamA.membNum < TEAMSIZE)
                 {
@@ -173,6 +97,7 @@ enum actions {eShot, eDribbling, eInjury};
 
 
                 }
+                //TeamMemberAcceptance(sockFD, buffer, & Ref.teamA, "A", & QueueA, pipe_A[1]);
 
                 sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
                 while(Ref.teamB.membNum < TEAMSIZE);
@@ -185,7 +110,7 @@ enum actions {eShot, eDribbling, eInjury};
             Ref.gameStatus--;
                 currPlayer = Ref.teamB.captain;
 
-                TeamCaptainInitialization(sockFD, buffer, currPlayer, 'B');
+                TeamCaptainInitialization(sockFD, buffer,&Ref, currPlayer, 'B');
                 Ref.teamB.membNum++;
                 
 
@@ -335,24 +260,6 @@ enum actions {eShot, eDribbling, eInjury};
         }
     }
 
-    void printStatsOfMAtch()
-    {
-        char msg[BUFFSIZE] = "";
-        int totalGoal = Ref.stats.numberGoalA + Ref.stats.numberGoalB;
-        
-        sprintf(msg, "GOAL segnati nel match: %d\n", totalGoal);
-        writeLog(Ref.pathLogServer, msg);
-        setBuff(msg, "");
-        
-        sprintf(msg, "SHOT falliti nel match: %d\n", Ref.stats.shotFailed);
-        writeLog(Ref.pathLogServer, msg);
-        setBuff(msg, "");
-
-        sprintf(msg, "DRIBBLING effettuati nel match: %d\n", Ref.stats.numberDribbling);
-        writeLog(Ref.pathLogServer, msg);
-        setBuff(msg, "");
-    }
-
     int createNewLogFile()
     {
         char pathLogServer[100], pathLogLib[100], buffer[26];
@@ -405,7 +312,7 @@ enum actions {eShot, eDribbling, eInjury};
             char buffer[BUFFSIZE] = "";
             sprintf(buffer, "\n\nPARTITA FINITA\n%s %d-%d %s\n", Ref.teamA.teamName, Ref.stats.numberGoalA, Ref.stats.numberGoalB, Ref.teamB.teamName);
             printf("%s", buffer); sendMSGtoAllClients(Ref, buffer);
-            printStatsOfMAtch();            
+            printStatsOfMAtch(Ref);            
         signal(&S);
     }
 
