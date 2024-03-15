@@ -9,6 +9,7 @@
 #include <time.h>
 #include "gameLogicStructs.h"
 #include "clientManagement.h"
+#include "serverManagement.h"
 
 #define DURATION 10
 #define INJ_TIME_MOD 6
@@ -20,7 +21,7 @@ void goal(struct referee* Ref, struct player* player, char* msg);
 void injury(struct referee* Ref, struct player* player, char* msg);
 void addShotFailed(struct stats* stats);
 void addDribbling(struct stats* stats);
-void writeLog(char* path, char* msg);
+
 typedef int ball;
 
     void wait(ball* mutex)
@@ -101,13 +102,6 @@ typedef int ball;
         }
         printf("%s", msg); sendMSGtoAllClients(*Ref, msg);
         writeLog(Ref->pathLogLib, msg);
-    }
-
-    void writeLog(char* path, char* msg)
-    {
-        FILE* fp = fopen(path, "a");
-        fwrite(msg, sizeof(char), strlen(msg), fp);
-        fclose(fp);
     }
     
     void addDribbling(struct stats* stats) { stats -> numberDribbling++; }
