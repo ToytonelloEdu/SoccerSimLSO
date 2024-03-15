@@ -64,13 +64,13 @@ void sendTeamResponseByPipe(int pipeWrite, char* response, char* team, char posi
     write(pipeWrite, buffer, strlen(buffer));
 }
 
-int recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** playerPTR)
+char* recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** playerPTR)
 {
-    char buffer[20];
+    char buffer[20], msg[22];
 
     read(pipeRead, buffer, 20);
 
-    if(buffer[0] == '0') { return 0; }
+    if(buffer[0] == '0') { sprintf(msg, "Rifiutato da team %c\n", buffer[2]); return msg; }
 
     int pos = buffer[4] - 48;
 
@@ -86,7 +86,7 @@ int recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** pl
     }
     
 
-    return 1;
+    sprintf(msg, "Accettato da team %c\n", buffer[2]); return msg;
 }
 
 void sendMSGtoAllClients(struct referee Ref, char* msg)
