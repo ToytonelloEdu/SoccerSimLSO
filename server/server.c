@@ -18,31 +18,41 @@
 
 #include "../lib/gameLogicStructs.h"
 #include "../lib/gameLogicFuncts.h"
-#include "../lib/clientManagement.h"
 #include "../lib/serverManagement.h"
+#include "../lib/clientManagement.h"
+
 
 int S = 1;
 struct referee Ref; int pipe_A[2]; int pipe_B[2];
 struct playerQueue QueueA = {0,0}, QueueB = {0,0};
 
-enum actions {eShot, eDribbling, eInjury};
-
     void selectAction(struct player* player)
     {
         wait(&S);
         
-        char buffer[BUFFSIZE] = "";
-        PlayerToString(buffer, *player);
-        int result = rand() % 3;
+            char buffer[BUFFSIZE] = "";
+            PlayerToString(buffer, *player);
 
-        if (result == eShot ) { shot(&Ref, player, buffer); } 
-        if (result == eDribbling ) { dribbling(&Ref, player, buffer); }
-        if (result == eInjury ) { injury(&Ref, player, buffer); }
+            switch (getRandomAction(defaultProbs))
+            {
+            case eShot:      
+                Shot(&Ref, player, buffer, defShotProb);
+                break;
+            case eDribble: 
+                Dribbling(&Ref, player, buffer, defDribbleProb);           
+                break;
+            case eInjury:    
+                Injury(&Ref, player, buffer);            
+                break;
+            default: 
+                sendErrorMSG();
+                break;
+            }
 
-        delay(15000);
+            sleep(ACT_INTER);
 
         signal(&S);
-        delay(500);
+        sleep(ACT_COOLDOWN);
     }
 
     void* AcceptNewPlayer(void* socketFD)
@@ -52,132 +62,72 @@ enum actions {eShot, eDribbling, eInjury};
         char buffer[BUFFSIZE] = "";
 
         if(Ref.gameStatus == nogame)
-        {
-            Ref.gameStatus = oneCaptainNeeded;
+            {
+                Ref.gameStatus = oneCaptainNeeded;
+                    currPlayer = Ref.teamA.captain;
 
-                currPlayer = Ref.teamA.captain;
+                    sendMSG(sockFD, "Inizio creazione partita\n\n"); read(sockFD, buffer, BUFFSIZE);
+                        setBuff(buffer, "");
 
-                sendMSG(sockFD, "Inizio creazione partita\n\n"); read(sockFD, buffer, BUFFSIZE);
-                    setBuff(buffer, "");
-                TeamCaptainInitialization(sockFD, buffer,&Ref, currPlayer, 'A');
-                Ref.teamA.membNum++;
+                    TeamCaptainInitialization(sockFD, buffer,&Ref, currPlayer, 'A');
+                    Ref.teamA.membNum++;
 
-                setBuff(buffer, "La partita è ");strcat(buffer, Ref.teamA.teamName);
-                strcat(buffer, "-");
-                strcat(buffer, Ref.teamB.teamName);strcat(buffer, "\n");
-                
-                printf("%s", buffer);
-                sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
-                
-                //capitano accetta giocatori
-            
-                TeamMemberAcceptance(sockFD, buffer, & Ref.teamA, "A", & QueueA, pipe_A[1]);
+                    MatchPresentation(sockFD, buffer, Ref);
+                    printf("%s", buffer);
+                    
+                        setBuff(buffer, "");
+                    
+                    TeamMemberAcceptance(sockFD, buffer, & Ref.teamA, "A", & QueueA, pipe_A[1]); //capitano accetta giocatori
 
-                sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
-                while(Ref.teamB.membNum < TEAMSIZE);
+                    sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
+                    while(Ref.teamB.membNum < TEAMSIZE);
 
-            Ref.gameStatus = gameStarting;
+                Ref.gameStatus = gameStarting;
 
-        }
+            }
         else if(Ref.gameStatus == oneCaptainNeeded )
-        {
-            Ref.gameStatus--;
-                currPlayer = Ref.teamB.captain;
+            {
+                Ref.gameStatus--;
+                    currPlayer = Ref.teamB.captain;
 
-                TeamCaptainInitialization(sockFD, buffer,&Ref, currPlayer, 'B');
-                Ref.teamB.membNum++;
+                    TeamCaptainInitialization(sockFD, buffer,&Ref, currPlayer, 'B');
+                    Ref.teamB.membNum++;
+                    
+                    MatchPresentation(sockFD, buffer, Ref);
+
+                        setBuff(buffer, "");
+
+                    TeamMemberAcceptance(sockFD, buffer, & Ref.teamB, "B", & QueueB, pipe_B[1]); //capitano accetta giocatori
+
+                    sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
+                    
+                while(Ref.teamA.membNum < TEAMSIZE);
+            }
+        else 
+            {
+                WaitCaptains(sockFD, buffer, &Ref);
+                MatchPresentation(sockFD, buffer, Ref);
+
+                    sendMSG(sockFD, "\nCrea il tuo giocatore!\n"); read(sockFD, buffer, BUFFSIZE);
                 
-
-                setBuff(buffer, "La partita è ");strcat(buffer, Ref.teamA.teamName);
-                strcat(buffer, "-");
-                strcat(buffer, Ref.teamB.teamName);strcat(buffer, "\n");
-
-                
-                sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+                struct player tmpPlayer;
+                NewPlayerInitialization(sockFD, buffer, &tmpPlayer);
+                playerConfirmation(sockFD, buffer, &tmpPlayer);
 
                     setBuff(buffer, "");
-
-                //capitano accetta giocatori
                 
-                TeamMemberAcceptance(sockFD, buffer, & Ref.teamB, "B", & QueueB, pipe_B[1]);
+                switch (TeamRequestChoice(sockFD, buffer, & Ref)) //nuovo giocatore si pone in coda per entrare in una squadra
+                {
+                case 1 : currPlayer = TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueA, pipe_A[0]);
+                    break;
+                case 2 : currPlayer = TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueB, pipe_B[0]);
+                    break;
+                default : sendErrorMSG();
+                    break;
+                }
 
-                sendMSG(sockFD, "Squadra al completo!\n"); read(sockFD, buffer, BUFFSIZE);
-                
-            while(Ref.teamA.membNum < TEAMSIZE);
-        
-        }
-        else 
-        {
-            if(Ref.gameStatus == gameCreation || Ref.gameStatus == waitingOtherCaptain)
-            {
-                sendMSG(sockFD, "Creazione partita in corso: ATTENDI\n\n");
-                read(sockFD, buffer, BUFFSIZE);
-
-                while(Ref.gameStatus != gameCreated);
-                sendMSG(sockFD, "Partita creata!\n");
-                read(sockFD, buffer, BUFFSIZE);
+                WaitFullTeams(sockFD, buffer, &Ref);
             }
-            else if(Ref.gameStatus == gameCreated)
-            {
-                sendMSG(sockFD, "Creazione partita completata\n\n");
-                read(sockFD, buffer, BUFFSIZE);
-            }
-
-            sendMSG(sockFD, "Crea il tuo giocatore!\n"); read(sockFD, buffer, BUFFSIZE);
-            
-            struct player tmpPlayer;
-            char ansBuff[BUFFSIZE] = "";
-
-                setBuff(buffer, "");
-
-            askMSG(sockFD, "Inserisci il tuo nome: ");
-            read(sockFD, buffer, BUFFSIZE);
-            char name[50]; strcpy_noNL(name, buffer);
-
-                setBuff(buffer, "");
-
-            askMSG(sockFD, "Inserisci il tuo numero di maglia: ");
-            read(sockFD, buffer, BUFFSIZE); int num = atoi(buffer);
-            char sNum[3] = ""; strcpy_noNL(sNum, buffer);
-            
-                setBuff(buffer, "");
-        
-            
-            initPlayer(&tmpPlayer, name, num);
-            tmpPlayer.playerFD = sockFD;
-            tmpPlayer.playerTID = syscall(__NR_gettid);
-
-                setBuff(buffer, "");
-            
-            setBuff(buffer, "Nuovo giocatore: "); strcat(buffer, tmpPlayer.name);
-            strcat(buffer, " con numero "); strcat(buffer, sNum); strcat(buffer, "\n");
-            printf("%s", buffer);
-            sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE); 
-
-                setBuff(buffer, "");
-
-            //nuovo giocatore si pone in coda per entrare in una squadra
-            
-            switch (TeamRequestChoice(sockFD, buffer, & Ref))
-            {
-            case 1 :
-                TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueA, pipe_A[0]);
-                break;
-            
-            case 2:
-                TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueB, pipe_B[0]);
-                break;
-            default:
-                sendErrorMSG();
-                break;
-            }
-
-            if(Ref.gameStatus < gameStarting)
-            {
-                sendMSG(sockFD, "Squadre non al completo, attendi inizio partita\n"); read(sockFD, buffer, BUFFSIZE);
-                while(Ref.gameStatus != gameStarting);
-            }
-        }
         
         sendMSG(sockFD, "Tutto pronto: INIZIA LA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);    
 
@@ -195,56 +145,33 @@ enum actions {eShot, eDribbling, eInjury};
     int createNewLogFile()
     {
         char pathLogServer[100], pathLogLib[100], buffer[26];
-        time_t hour;
-        time(&hour);
-        ctime_r(&hour, buffer);
-        
-        sprintf(pathLogLib, "../server/log/%s-logFile.txt", buffer);
-        strncpy(Ref.pathLogLib, pathLogLib, 54);
+        time_t hour; time(&hour); ctime_r(&hour, buffer);
         
         sprintf(pathLogServer, "./log/%s-logFile.txt", buffer);    
         strncpy(Ref.pathLogServer, pathLogServer, 54);
+
         return creat(pathLogServer, S_IRUSR | S_IWUSR | S_IROTH);
     }
 
     void* MatchClockThread(void* arg)
     {
         while(Ref.gameStatus != gameStarting);
+
         Ref.logFD = createNewLogFile();
+        char buffer[BUFFSIZE] = "";
 
-        printf("\nTutto pronto: INIZIA LA PARTITA\n\n");
-        delay(500);
-        printf("Minute: 0\n");
+        MatchStart(&Ref);
+            while(Ref.time < DURATION)
+            {
+                Ref.time++;
+                sendMinuteToAllOutputs(Ref);
+                sleep(2);
+            }
+        RecoveryTime(buffer, &Ref);
 
-        int i = 0; 
-        char tmpBuff[BUFFSIZE] = "";
-        sprintf(tmpBuff, "Minute: 0\n");
-        writeLog(Ref.pathLogServer, tmpBuff);
-        setBuff(tmpBuff, "");
-        Ref.gameStatus = gameStarted; Ref.time = 0;
-            
-        sendMinuteToAllClients(Ref);
-        while(Ref.time < DURATION)
-        {
-            printf("Minute: %d\n", ++Ref.time);
-            sprintf(tmpBuff, "Minute: %d\n", Ref.time);
-            writeLog(Ref.pathLogServer, tmpBuff);
-            setBuff(tmpBuff, "");
-            sendMinuteToAllClients(Ref);
-            sleep(2);
-        }
-
-        printf("Minuti di recupero\n");
-        sprintf(tmpBuff, "Minuti di recupero\n");
-        writeLog(Ref.pathLogServer, tmpBuff);
-        setBuff(tmpBuff, "");
-        sendMSGtoAllClients(Ref, "Minuti di recupero\n");
-
+        sleep(5);
         wait(&S);
-            char buffer[BUFFSIZE] = "";
-            sprintf(buffer, "\n\nPARTITA FINITA\n%s %d-%d %s\n", Ref.teamA.teamName, Ref.stats.numberGoalA, Ref.stats.numberGoalB, Ref.teamB.teamName);
-            printf("%s", buffer); sendMSGtoAllClients(Ref, buffer);
-            printStatsOfMAtch(Ref);            
+            MatchFinish(buffer, &Ref);            
         signal(&S);
     }
 
@@ -258,43 +185,28 @@ enum actions {eShot, eDribbling, eInjury};
         createPipe(pipe_A); createPipe(pipe_B); srand(time(NULL));
         InitReferee(&Ref);initTeam(&(Ref.teamA));initTeam(&(Ref.teamB));
         pthread_create(& Ref.clockThread, NULL, MatchClockThread, NULL);
-        pthread_detach(Ref.clockThread);
-        pthread_setschedprio(Ref.clockThread, 10);
+        pthread_detach(Ref.clockThread); pthread_setschedprio(Ref.clockThread, 10);
         
         if((wsock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-        {
-            perror("Failed to create socket");
-            exit(EXIT_FAILURE);
-        }
-        if(setsockopt(wsock_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
-        {
-            perror("setsockopt failed");
-            exit(EXIT_FAILURE);
-        }
+        { perror("Failed to create socket"); exit(EXIT_FAILURE); }
 
-        memset(&servaddr, 0, sizeof(servaddr));
-        memset(&cliaddr, 0, sizeof(cliaddr));
+        if(setsockopt(wsock_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+        { perror("setsockopt failed"); exit(EXIT_FAILURE); }
+
+        memset(&servaddr, 0, sizeof(servaddr)); memset(&cliaddr, 0, sizeof(cliaddr));
 
         servaddr.sin_family = AF_INET;
         servaddr.sin_port = htons(12345);
         servaddr.sin_addr.s_addr = INADDR_ANY;
         
         if(bind(wsock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
-        {
-            perror("Bind failed");
-            exit(EXIT_FAILURE);
-        }
+        { perror("Bind failed"); exit(EXIT_FAILURE); }
 
         
         if(listen(wsock_fd, 10) < 0)
-        {
-            perror("listen error");
-            exit(EXIT_FAILURE);
-        }
-
+        { perror("listen error"); exit(EXIT_FAILURE); }
 
         int addrlen = sizeof(cliaddr);
-
 
         while((new_socket = accept(wsock_fd, (struct sockaddr*)&cliaddr, (socklen_t*)&addrlen)) > -1)
         {
