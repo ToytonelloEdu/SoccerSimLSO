@@ -42,6 +42,12 @@ struct stats;
         player->teamName = teamName;
     }
 
+    void setPlayerSysVar(struct player* player, int FD, pthread_t TID)
+    {
+        player->playerFD = FD;
+        player->playerTID = TID;
+    }
+
     void copyPlayer(struct player* dest, struct player src)
     {
         strncpy(dest->name, src.name, NAMESIZE);
@@ -109,7 +115,6 @@ struct stats;
         struct team teamB;
         struct stats stats;
         int logFD;                    //file descriptor of the game log file
-        char pathLogLib[PATHSIZE];
         char pathLogServer[PATHSIZE];
         int time;
     };
