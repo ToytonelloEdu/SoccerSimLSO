@@ -22,6 +22,7 @@
 #define BUFFSIZE 512
 
 int sendMSG(int socket, char* msg);
+int sendMSGnoRet(int socket, char* msg);
 void sendMSGtoAllClients(struct referee Ref, char* msg);
 
 void setBuff(char* buffer, char* text)
@@ -64,13 +65,13 @@ void sendTeamResponseByPipe(int pipeWrite, char* response, char* team, char posi
     write(pipeWrite, buffer, strlen(buffer));
 }
 
-char* recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** playerPTR)
+void recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** playerPTR, char  msg[25])
 {
-    char buffer[20], msg[22];
+    char buffer[20];
 
     read(pipeRead, buffer, 20);
 
-    if(buffer[0] == '0') { sprintf(msg, "Rifiutato da team %c\n", buffer[2]); return msg; }
+    if(buffer[0] == '0') { sprintf(msg, "Rifiutato da team %c\n", buffer[2]);}
 
     int pos = buffer[4] - 48;
 
@@ -86,7 +87,7 @@ char* recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** 
     }
     
 
-    sprintf(msg, "Accettato da team %c\n", buffer[2]); return msg;
+    sprintf(msg, "Accettato da team %c\n", buffer[2]);
 }
 
 void sendMSGtoAllClients(struct referee Ref, char* msg)
@@ -94,22 +95,12 @@ void sendMSGtoAllClients(struct referee Ref, char* msg)
         int i; char resp[2];
         for(i = 0; i < TEAMSIZE; i++)
         {
-            sendMSG(Ref.teamA.members[i].playerFD, msg); 
-            read(Ref.teamA.members[i].playerFD, resp, 2);
-        }
-        for(i = 0; i < TEAMSIZE; i++)
-        {
-            sendMSG(Ref.teamB.members[i].playerFD, msg);
-            read(Ref.teamB.members[i].playerFD, resp, 2);   
+            sendMSGnoRet(Ref.teamA.members[i].playerFD, msg); 
+            //read(Ref.teamA.members[i].playerFD, resp, 2);
+            sendMSGnoRet(Ref.teamB.members[i].playerFD, msg);
+            //read(Ref.teamB.members[i].playerFD, resp, 2);
         }
     }
-
-void sendMinuteToAllClients(struct referee Ref)
-{
-    char buffer[15]; int i;
-    sprintf(buffer, "Minute: %d\n", Ref.time);
-    sendMSGtoAllClients(Ref, buffer);
-}
 
 int sendMSG(int socket, char* msg)
 {
@@ -123,12 +114,16 @@ int askMSG(int socket, char* msg)
     strcat(buff, msg);
     return write(socket, buff, strlen(buff));
 }
-
 int sendMSGnoRet(int socket, char* msg)
 {
     char buff[BUFFSIZE] = "(2)";
     strcat(buff, msg);
     return write(socket, buff, strlen(buff));
+}
+
+int sendErrorMSG()
+{
+    
 }
 
 #endif
