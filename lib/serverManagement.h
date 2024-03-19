@@ -381,7 +381,12 @@ int answA, answB;
 
 void* AskCaptain(void* Player)
 {
-    struct player* currPlayer = (struct player*) Player;
+    struct player* currPlayer = (struct player*) Player; int* answ;
+
+    if(currPlayer->team == 'A') answ = &answA;
+    else if (currPlayer->team == 'B') answ = &answB;
+    else return;
+    
     char buffer[BUFFSIZE];
     askMSG(currPlayer->FD, "Do you want to accept the rematch? (Y/N): ");
     read(currPlayer->FD, buffer, BUFFSIZE);
@@ -390,10 +395,11 @@ void* AskCaptain(void* Player)
         switch (buffer[0])
         {
         case 'Y':
-            return 1;
+            *answ = 1;
+            return;
             break;
         case 'N':
-            return 0;
+            *answ = 1;
             break;
         default:
             sendErrorMSG(currPlayer->FD, wrongInput, "only accepted answers are Y and N\n"); read(currPlayer->FD, buffer, BUFFSIZE);
