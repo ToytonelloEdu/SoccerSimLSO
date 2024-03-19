@@ -52,22 +52,34 @@ int main(int argc, char* argv[])
     {
         char rBuffer[BUFFSIZE] = ""; 
         rdout = read(sock_fd, rBuffer, BUFFSIZE);
-        //printf("%c", buffer[0]);
+        
         for(int i = 3; i < strlen(rBuffer); i++)
         {
             printf("%c", rBuffer[i]);
         }
-        
-        if (rBuffer[1] == '0')
-            write(sock_fd, "", 1);
-        else if(rBuffer[1] == '1')
+
+        switch (rBuffer[1])
         {
+        case '0':
+            write(sock_fd, "", 1);
+            break;
+        case '1':
             char wBuffer[BUFFSIZE];
             fgets(wBuffer, BUFFSIZE, stdin);
             write(sock_fd, wBuffer, strlen(wBuffer));
+            break;
+        case '2': NULL;
+            break;
+        case '3':
+            write(sock_fd, "CLI_ERROR", 10);
+            break;
+        case '9':
+            rdout = -1;
+            break;
+        
+        default: write(sock_fd, "SRV_ERROR", 10);
+            break;
         }
-        else if (rBuffer[1] != '2')
-            write(sock_fd, "ERROR", 6);
         
     }while(rdout > -1);
 

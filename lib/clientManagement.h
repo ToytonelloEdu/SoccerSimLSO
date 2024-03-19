@@ -18,6 +18,7 @@
 #include <asm-generic/socket.h>
 
 #include "gameLogicStructs.h"
+//#include "errorChecking.h"
 
 #define BUFFSIZE 512
 
@@ -95,10 +96,8 @@ void sendMSGtoAllClients(struct referee Ref, char* msg)
         int i; char resp[2];
         for(i = 0; i < TEAMSIZE; i++)
         {
-            sendMSGnoRet(Ref.teamA.members[i].playerFD, msg); 
-            //read(Ref.teamA.members[i].playerFD, resp, 2);
-            sendMSGnoRet(Ref.teamB.members[i].playerFD, msg);
-            //read(Ref.teamB.members[i].playerFD, resp, 2);
+            sendMSGnoRet(Ref.teamA.members[i].FD, msg);
+            sendMSGnoRet(Ref.teamB.members[i].FD, msg);
         }
     }
 
@@ -121,9 +120,23 @@ int sendMSGnoRet(int socket, char* msg)
     return write(socket, buff, strlen(buff));
 }
 
-int sendErrorMSG()
+enum errType {wrongInput};
+char* errors[] =  {"Wrong Input"};
+
+
+int sendErrorMSG(int socket, enum errType eErr, char* msg)
 {
-    
+    char buff[BUFFSIZE] = "(3)";
+    sprintf(buff, "%s%s", buff, errors[eErr]);
+    if (strlen(msg) > 0) {strcat(buff, ": "), strcat(buff, msg);}
+    return write(socket, buff, strlen(buff));
+}
+
+int sendExitMSG(int socket, char* msg)
+{
+    char buff[BUFFSIZE] = "(9)";
+    strcat(buff, msg);
+    return write(socket, buff, strlen(buff));
 }
 
 #endif

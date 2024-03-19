@@ -45,11 +45,11 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                 Injury(&Ref, player, buffer);            
                 break;
             default: 
-                sendErrorMSG();
+                sendErrorMSG(player->FD, wrongInput, "");
                 break;
             }
 
-            sleep(ACT_INTER);
+            sleep(ACT_INTERVAL);
 
         signal(&S);
         sleep(ACT_COOLDOWN);
@@ -122,7 +122,7 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                     break;
                 case 2 : currPlayer = TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueB, pipe_B[0]);
                     break;
-                default : sendErrorMSG();
+                default : sendErrorMSG(sockFD, wrongInput, "choose between teams A and B");
                     break;
                 }
 

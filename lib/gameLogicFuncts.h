@@ -12,7 +12,7 @@
 #include "serverManagement.h"
 
 #define DURATION 90
-#define ACT_INTER 5
+#define ACT_INTERVAL 5
 #define ACT_COOLDOWN 2
 #define INJ_TIME_MOD 25
 #define INJ_TIME_BASE 5
@@ -41,15 +41,6 @@ typedef int ball;
         if(*mutex != 0) {*mutex = 0;} //per provare a correggere errore quando entrano 2 thread nel semaforo??
         (*mutex)++;
     }
-
-    /* 
-    void delay(int num_of_seconds)
-    {
-        int milliseconds = 1000 * num_of_seconds;
-        clock_t start = clock();
-        while(clock() < start + milliseconds){}
-    } 
-    */
 
     int valInBetween(int bottom, int val, int top)
     {

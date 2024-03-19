@@ -7,6 +7,7 @@
 
 #include "gameLogicStructs.h"
 #include "clientManagement.h"
+#include "errorChecking.h"
 
 #define QSIZE 15
 
@@ -51,8 +52,8 @@ void TeamCaptainInitialization(int sockFD, char buffer[], struct referee* Ref, s
 void getTeamName(int sockFD, char buffer[], struct referee* Ref, char team);
 void NewPlayerInitialization(int sockFD, char buffer[], struct player* newPlayer);
 //
-void getPlayerName(int sockFD, char buffer[], char name[50]);
-int getPlayerNumber(int sockFD, char buffer[], char numS[3]);
+void getPlayerName(int sockFD, char buffer[], char name[NAMESIZE]);
+int getPlayerNumber(int sockFD, char buffer[], char numS[5]);
 //
 char TeamRequestChoice(int sockFD, char buffer[], struct referee* Ref);
 struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player* newPlayer,struct playerQueue* Queue, int pipeRead);
@@ -178,6 +179,13 @@ void TeamCaptainInitialization(int sockFD, char buffer[], struct referee* Ref, s
     while(Ref->gameStatus != gameCreated);
 }
 
+void askTeamName(int sockFD, char buffer[], char name[], char team)
+{
+    sprintf(buffer, "Inserisci nome squadra %c: ", team);
+    askMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+    strcpy_noNL(name, buffer);
+}
+
 void getTeamName(int sockFD, char buffer[], struct referee* Ref, char team)
 {
         sprintf(buffer, "Sei il capitano della squadra %c\n", team);
@@ -185,11 +193,20 @@ void getTeamName(int sockFD, char buffer[], struct referee* Ref, char team)
         
             setBuff(buffer, "");
 
-        sprintf(buffer, "Inserisci nome squadra %c: ", team);
-        askMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+        char name[NAMESIZE];
+        askTeamName(sockFD, buffer, name, team);
 
-        if(team == 'A') {strcpy_noNL(Ref->teamA.teamName, buffer); printf("La squadra %c è %s\n", team, Ref->teamA.teamName);}
-        if(team == 'B') {strcpy_noNL(Ref->teamB.teamName, buffer); printf("La squadra %c è %s\n", team, Ref->teamB.teamName);}
+            while(ValidName(name) == 0)
+            {
+                sendErrorMSG(sockFD, wrongInput, "team name not valid, must be a word with Capital initial and no numbers\n");
+                read(sockFD, buffer, BUFFSIZE); setBuff(buffer, ""); 
+                askTeamName(sockFD, buffer, name, team);
+            } 
+       
+        
+
+        if(team == 'A') {strcpy_noNL(Ref->teamA.teamName, name); printf("La squadra %c è %s\n", team, Ref->teamA.teamName);}
+        if(team == 'B') {strcpy_noNL(Ref->teamB.teamName, name); printf("La squadra %c è %s\n", team, Ref->teamB.teamName);}
 
           
 }
@@ -225,10 +242,10 @@ void NewPlayerInitialization(int sockFD, char buffer[], struct player* newPlayer
 {
     setBuff(buffer, "");
 
-        char name[50];
+        char name[NAMESIZE];
         getPlayerName(sockFD, buffer, name); 
 
-        char sNum[3];
+        char sNum[5];
         int num = getPlayerNumber(sockFD, buffer, sNum);
 
             setBuff(buffer, "");
@@ -239,22 +256,46 @@ void NewPlayerInitialization(int sockFD, char buffer[], struct player* newPlayer
 
 //PLAYERS DATA FUNCTIONS
 
-void getPlayerName(int sockFD, char buffer[], char name[50])
+void askName(int sockFD, char buffer[], char name[NAMESIZE])
 {
-    setBuff(buffer, "");
-
     askMSG(sockFD, "Inserisci il tuo nome: ");
     read(sockFD, buffer, BUFFSIZE);
-    strcpy_noNL(name, buffer);            
+    strcpy_noNL(name, buffer); 
 }
 
-int getPlayerNumber(int sockFD, char buffer[], char sNum[3])
+void getPlayerName(int sockFD, char buffer[], char name[NAMESIZE])
 {
     setBuff(buffer, "");
 
+    askName(sockFD, buffer, name);
+    while(! ValidName(name))
+        {
+            sendErrorMSG(sockFD, wrongInput, "name not valid, must be a word with Capital initial and no numbers\n");
+            read(sockFD, buffer, BUFFSIZE); setBuff(buffer, ""); 
+            askName(sockFD, buffer, name);
+        }
+             
+}
+
+void askNumber(int sockFD, char buffer[], char sNum[5])
+{
     askMSG(sockFD, "Inserisci il tuo numero di maglia: ");
-    read(sockFD, buffer, BUFFSIZE); int num = atoi(buffer);
-    strcpy_noNL(sNum, buffer);
+    read(sockFD, buffer, BUFFSIZE); strcpy_noNL(sNum, buffer);
+}
+
+int getPlayerNumber(int sockFD, char buffer[], char sNum[5])
+{
+    setBuff(buffer, "");
+
+    askNumber(sockFD, buffer, sNum);
+    while(! ValidNumber(sNum))
+    {
+        sendErrorMSG(sockFD, wrongInput, "number not valid, must in between 1 and 99\n");
+        read(sockFD, buffer, BUFFSIZE); setBuff(buffer, ""); 
+        askNumber(sockFD, buffer, sNum);
+    }
+
+    int num = atoi(sNum); 
         
     return num;
 }
@@ -298,7 +339,7 @@ void TeamMemberAcceptance(int sockFD, char buffer[], struct team* Team, char* te
         case 'N': newMemberRejected(sockFD, buffer, Team, teamStr , Queue, pipeWrite); 
                   qNext(Queue); 
             break;
-        default : sendErrorMSG();
+        default : sendErrorMSG(sockFD, wrongInput, "only accepted answers are Y and N"); read(sockFD, buffer, BUFFSIZE);
             break;
         }             
     }

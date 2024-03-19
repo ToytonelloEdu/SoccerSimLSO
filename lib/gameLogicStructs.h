@@ -20,12 +20,12 @@ struct stats;
 
     struct player //struct modeling players/clients
     {
-        int playerFD;                   //file descriptor of socket of the player/client
+        int FD;                   //file descriptor of socket of the player/client
         char name[NAMESIZE];                     
         char shirtNumber; 
         char team;
         char* teamName;
-        pthread_t playerTID;           //id for thread managing of the player/client
+        pthread_t TID;           //id for thread managing of the player/client
         int resumePlay;
     };
 
@@ -44,8 +44,8 @@ struct stats;
 
     void setPlayerSysVar(struct player* player, int FD, pthread_t TID)
     {
-        player->playerFD = FD;
-        player->playerTID = TID;
+        player->FD = FD;
+        player->TID = TID;
     }
 
     void copyPlayer(struct player* dest, struct player src)
@@ -54,8 +54,8 @@ struct stats;
         dest->shirtNumber = src.shirtNumber;
         dest->team = src.team;
         dest->teamName = src.teamName;
-        dest->playerFD = src.playerFD;
-        dest->playerTID = src.playerTID;
+        dest->FD = src.FD;
+        dest->TID = src.TID;
         dest->resumePlay = src.resumePlay;
     }
 
