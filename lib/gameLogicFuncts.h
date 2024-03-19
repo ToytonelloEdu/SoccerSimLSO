@@ -140,7 +140,7 @@ typedef int ball;
 
     int getInjuryTime()
     {
-        return (rand() % INJ_TIME_MOD) + INJ_TIME_BASE;
+        return (rand() % INJ_TIME_MOD + 1) + INJ_TIME_BASE;
     }
 
     void getInjuryMSG(char* msg, struct player* player, int mins)
