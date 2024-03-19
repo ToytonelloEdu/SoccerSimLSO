@@ -151,8 +151,8 @@ void RecoveryTime(char buffer[], struct referee* Ref)
 void MatchFinish(char buffer[], struct referee* Ref)
 {
     sprintf(buffer, "\n\nPARTITA FINITA\n%s %d-%d %s\n", Ref->teamA.teamName, Ref->stats.numberGoalA, Ref->stats.numberGoalB, Ref->teamB.teamName);
-    printf("%s", buffer); sendMSGtoAllClients(*Ref, buffer);
-    printStatsOfMAtch(*Ref, buffer);
+    Ref->gameStatus = gameFinished;
+    printf("%s", buffer); sendMSGtoAllClients(*Ref, buffer); printStatsOfMAtch(*Ref, buffer);
 }
 
 //PLAYERS SIGN-IN FUNCTIONS
@@ -339,7 +339,7 @@ void TeamMemberAcceptance(int sockFD, char buffer[], struct team* Team, char* te
         case 'N': newMemberRejected(sockFD, buffer, Team, teamStr , Queue, pipeWrite); 
                   qNext(Queue); 
             break;
-        default : sendErrorMSG(sockFD, wrongInput, "only accepted answers are Y and N"); read(sockFD, buffer, BUFFSIZE);
+        default : sendErrorMSG(sockFD, wrongInput, "only accepted answers are Y and N\n"); read(sockFD, buffer, BUFFSIZE);
             break;
         }             
     }
@@ -376,5 +376,59 @@ struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player*
 
             return retPlayerPTR;
     }
+
+int answA, answB;
+
+void* AskCaptain(void* Player)
+{
+    struct player* currPlayer = (struct player*) Player;
+    char buffer[BUFFSIZE];
+    askMSG(currPlayer->FD, "Do you want to accept the rematch? (Y/N): ");
+    read(currPlayer->FD, buffer, BUFFSIZE);
+    while(1)
+    {
+        switch (buffer[0])
+        {
+        case 'Y':
+            return 1;
+            break;
+        case 'N':
+            return 0;
+            break;
+        default:
+            sendErrorMSG(currPlayer->FD, wrongInput, "only accepted answers are Y and N\n"); read(currPlayer->FD, buffer, BUFFSIZE);
+            setBuff(buffer, "");
+            askMSG(currPlayer->FD, "Do you want to accept the rematch? (Y/N): "); read(currPlayer->FD, buffer, BUFFSIZE);
+            break;
+        }
+    }   
+}
+
+void RestartGame(struct referee* Ref)
+{
+    sendMSGtoAllClients(*Ref, "Rematch is ON! Restarting the game...\n");
+    printf("Rematch is ON! Restarting the game...\n");
+    ResetRef(Ref);
+}
+
+void DisbandGame(struct referee* Ref)
+{
+    Ref->gameStatus = gameDisbanded;
+    printf("\nEnd of Match!\n"); writeLog(Ref->pathLogServer, "\nEnd of Match!\n");
+}
+
+int AskForRematch(struct referee* Ref)
+{
+    sendMSGtoAllClients(*Ref, "Asking captains for a rematch\n");
+    pthread_t a, b;
+    pthread_create(&a, NULL, AskCaptain, (void*) Ref->teamA.captain);
+    pthread_create(&a, NULL, AskCaptain, (void*) Ref->teamB.captain);
+    pthread_join(a, NULL); pthread_join(b, NULL);
+
+    if(answA && answB)
+        RestartGame(Ref);
+    else
+        DisbandGame(Ref);
+}
 
 #endif

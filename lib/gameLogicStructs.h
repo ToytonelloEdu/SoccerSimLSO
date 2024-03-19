@@ -11,7 +11,7 @@
 #define NAMESIZE 30
 #define PATHSIZE 54
 
-enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded, gameStarting, gameStarted, gameFinished};
+enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded, gameRestarting, gameStarting, gameStarted, gameFinished, gameDisbanded};
 
 struct referee;
 struct team;
@@ -125,6 +125,13 @@ struct stats;
         referee->time = -1;
         initStats(& referee->stats);
 
+    }
+
+    void ResetRef(struct referee* referee)
+    {
+        referee->gameStatus = gameRestarting;
+        referee->time = -1;
+        initStats(& referee->stats);
     }
 
 #endif

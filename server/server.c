@@ -131,15 +131,31 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
         
         sendMSG(sockFD, "Tutto pronto: INIZIA LA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);    
 
-        while(Ref.time < 0);
+        while(Ref.gameStatus != gameDisbanded)
+        {
+            while(Ref.time < 0);
 
-        while(Ref.time < DURATION){
+            while(Ref.time < DURATION){
             if (currPlayer -> resumePlay <= DURATION)
             {
                 while(Ref.time < currPlayer->resumePlay && Ref.gameStatus == gameStarted);
                 selectAction(currPlayer);
             }
+
+            while(Ref.gameStatus < gameDisbanded);
+
+            if(Ref.gameStatus == gameRestarting)
+            {
+                sendMSG(sockFD, "\n\nINIZIA UNA NUOVA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);
+            }
         }
+
+        sendExitMSG(sockFD, "Thanks for playing!!");
+
+        }
+        
+
+
     }
 
     int createNewLogFile()
@@ -155,24 +171,30 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
 
     void* MatchClockThread(void* arg)
     {
-        while(Ref.gameStatus != gameStarting);
+        while(Ref.gameStatus < gameDisbanded)
+        {
+            while(Ref.gameStatus != gameStarting);
 
-        Ref.logFD = createNewLogFile();
-        char buffer[BUFFSIZE] = "";
+            Ref.logFD = createNewLogFile();
+            char buffer[BUFFSIZE] = "";
 
-        MatchStart(&Ref);
-            while(Ref.time < DURATION)
-            {
-                Ref.time++;
-                sendMinuteToAllOutputs(Ref);
-                sleep(2);
-            }
-        RecoveryTime(buffer, &Ref);
+            MatchStart(&Ref);
+                while(Ref.time < DURATION)
+                {
+                    Ref.time++;
+                    sendMinuteToAllOutputs(Ref);
+                    sleep(2);
+                }
+            RecoveryTime(buffer, &Ref);
 
-        sleep(5);
-        wait(&S);
-            MatchFinish(buffer, &Ref);            
-        signal(&S);
+            sleep(5);
+            wait(&S);
+                MatchFinish(buffer, &Ref);            
+            signal(&S);
+
+            AskForRematch(&Ref);
+        }
+        exit(1);
     }
 
     int main(int argc, char* argv[])
