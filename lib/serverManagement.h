@@ -385,21 +385,20 @@ void* AskCaptain(void* Player)
 
     if(currPlayer->team == 'A') answ = &answA;
     else if (currPlayer->team == 'B') answ = &answB;
-    else return;
     
     char buffer[BUFFSIZE];
     askMSG(currPlayer->FD, "Do you want to accept the rematch? (Y/N): ");
     read(currPlayer->FD, buffer, BUFFSIZE);
-    while(1)
+    int loop = 1;
+    while(loop)
     {
         switch (buffer[0])
         {
         case 'Y':
-            *answ = 1;
-            return;
+            *answ = 1; loop = 0;
             break;
         case 'N':
-            *answ = 1;
+            *answ = 1;  loop = 0;
             break;
         default:
             sendErrorMSG(currPlayer->FD, wrongInput, "only accepted answers are Y and N\n"); read(currPlayer->FD, buffer, BUFFSIZE);

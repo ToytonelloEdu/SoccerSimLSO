@@ -1,0 +1,35 @@
+Minute: 0
+Minute: 1
+	(No 4) Xiomy for team Juventus
+	Shot failed
+Minute: 2
+Minute: 3
+	(No 35) Antonio for team Napoli
+	Shot failed
+Minute: 4
+Minute: 5
+Minute: 6
+Minute: 7
+Minute: 8
+Minute: 9
+Minute: 10
+Minute: 11
+Minute: 12
+Minute: 13
+Minute: 14
+Minute: 15
+Minute: 16
+Minute: 17
+Minute: 18
+Minute: 19
+Minute: 20
+Minuti di recupero
+
+
+PARTITA FINITA
+Napoli 0-0 Juventus
+
+Statistiche della partita:
+GOAL segnati nel match: 0
+SHOT falliti nel match: 2
+DRIBBLING effettuati nel match: 0
