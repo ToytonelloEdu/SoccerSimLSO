@@ -129,32 +129,25 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                 WaitFullTeams(sockFD, buffer, &Ref);
             }
         
-        sendMSG(sockFD, "Tutto pronto: INIZIA LA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);    
-
         while(Ref.gameStatus != gameDisbanded)
         {
+            sendMSG(sockFD, "Tutto pronto: INIZIA LA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);    
             while(Ref.time < 0);
 
-            while(Ref.time < DURATION){
-            if (currPlayer -> resumePlay <= DURATION)
+            while(Ref.time < DURATION)
             {
-                while(Ref.time < currPlayer->resumePlay && Ref.gameStatus == gameStarted);
-                selectAction(currPlayer);
+                if (currPlayer -> resumePlay <= DURATION)
+                {
+                    while(Ref.time < currPlayer->resumePlay && Ref.gameStatus == gameStarted);
+                    selectAction(currPlayer);
+                }
             }
 
             while(Ref.gameStatus < gameDisbanded);
 
-            if(Ref.gameStatus == gameRestarting)
-            {
-                sendMSG(sockFD, "\n\nINIZIA UNA NUOVA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);
-            }
-        }
-
-        sendExitMSG(sockFD, "Thanks for playing!!");
-
         }
         
-
+        sendExitMSG(sockFD, "Thanks for playing!!");
 
     }
 
@@ -173,7 +166,7 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
     {
         while(Ref.gameStatus < gameDisbanded)
         {
-            while(Ref.gameStatus != gameStarting);
+            while(Ref.gameStatus != gameStarting && Ref.gameStatus != gameRestarting);
 
             Ref.logFD = createNewLogFile();
             char buffer[BUFFSIZE] = "";

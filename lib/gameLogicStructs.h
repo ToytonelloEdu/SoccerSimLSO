@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <string.h>
 
-#define TEAMSIZE 5
+#define TEAMSIZE 1
 #define BUFFSIZE 512
 #define NAMESIZE 30
 #define PATHSIZE 54
@@ -67,7 +67,7 @@ struct stats;
     void PlayerToString(char* buffer, struct player player)
     {
         char tmp[100] = "";
-        sprintf(tmp, "\t(No %d) %s for team %s\n", player.shirtNumber, player.name, player.teamName);
+        sprintf(tmp, " \t(No %d) %s for team %s\n", player.shirtNumber, player.name, player.teamName);
         //if(strlen(tmp) <= sizeof(buffer))
         strncpy(buffer, tmp, strlen(tmp));
     }

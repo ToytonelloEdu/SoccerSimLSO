@@ -377,7 +377,7 @@ struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player*
             return retPlayerPTR;
     }
 
-int answA, answB;
+int answA =  -1, answB = -1;
 
 void* AskCaptain(void* Player)
 {
@@ -385,6 +385,7 @@ void* AskCaptain(void* Player)
 
     if(currPlayer->team == 'A') answ = &answA;
     else if (currPlayer->team == 'B') answ = &answB;
+    else {printf("Non c'è il carattere team\n") ;pthread_exit(NULL);}
     
     char buffer[BUFFSIZE];
     askMSG(currPlayer->FD, "Do you want to accept the rematch? (Y/N): ");
@@ -398,7 +399,7 @@ void* AskCaptain(void* Player)
             *answ = 1; loop = 0;
             break;
         case 'N':
-            *answ = 1;  loop = 0;
+            *answ = 0;  loop = 0;
             break;
         default:
             sendErrorMSG(currPlayer->FD, wrongInput, "only accepted answers are Y and N\n"); read(currPlayer->FD, buffer, BUFFSIZE);
@@ -425,10 +426,12 @@ void DisbandGame(struct referee* Ref)
 int AskForRematch(struct referee* Ref)
 {
     sendMSGtoAllClients(*Ref, "Asking captains for a rematch\n");
+    printf("Asking captains for a rematch\n");
     pthread_t a, b;
     pthread_create(&a, NULL, AskCaptain, (void*) Ref->teamA.captain);
     pthread_create(&a, NULL, AskCaptain, (void*) Ref->teamB.captain);
-    pthread_join(a, NULL); pthread_join(b, NULL);
+    
+    while(answA == -1 && answB == -1);
 
     if(answA && answB)
         RestartGame(Ref);

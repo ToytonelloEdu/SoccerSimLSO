@@ -1,0 +1,36 @@
+Minute: 0
+Minute: 1
+ 	(No 5) A for team N
+	Dribbling
+	Shot
+	GOAL: 1-0
+Minute: 2
+Minute: 3
+ 	(No 7) V for team J
+	Dribbling failed
+Minute: 4
+Minute: 5
+ 	(No 5) A for team N
+	Shot failed
+Minute: 6
+Minute: 7
+Minute: 8
+ 	(No 7) V for team J
+	Shot failed
+Minute: 9
+Minute: 10
+ 	(No 5) A for team N
+	Dribbling
+	Shot failed
+Minuti di recupero
+
+
+PARTITA FINITA
+N 1-0 J
+
+Statistiche della partita:
+GOAL segnati nel match: 1
+SHOT falliti nel match: 3
+DRIBBLING effettuati nel match: 3
+
+End of Match!
