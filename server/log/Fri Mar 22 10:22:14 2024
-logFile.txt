@@ -1,0 +1,38 @@
+Minute: 0
+Minute: 1
+ 	(No 7) C for team J
+	Injured until min. 4 (for 3 minutes)
+Minute: 2
+Minute: 3
+ 	(No 5) A for team N
+	Shot failed
+Minute: 4
+Minute: 5
+ 	(No 7) C for team J
+	Dribbling
+	Shot
+	GOAL: 0-1
+Minute: 6
+Minute: 7
+Minute: 8
+ 	(No 5) A for team N
+	Dribbling
+	Shot failed
+Minute: 9
+Minute: 10
+ 	(No 7) C for team J
+	Dribbling
+	Shot
+	GOAL: 0-2
+Minuti di recupero
+
+
+PARTITA FINITA
+N 0-2 J
+
+Statistiche della partita:
+GOAL segnati nel match: 2
+SHOT falliti nel match: 2
+DRIBBLING effettuati nel match: 3
+
+End of Match!

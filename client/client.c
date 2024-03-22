@@ -52,10 +52,13 @@ int main(int argc, char* argv[])
     {
         char rBuffer[BUFFSIZE] = ""; 
         rdout = read(sock_fd, rBuffer, BUFFSIZE);
+        char printBuff[BUFFSIZE] = "";
+        strcpy(printBuff, rBuffer);
         
-        for(int i = 3; i < strlen(rBuffer); i++)
+        for(int i = 0; i < strlen(printBuff); i++)
         {
-            printf("%c", rBuffer[i]);
+            if(printBuff[i] = '[') i= i+3;
+            printf("%c", printBuff[i]);
         }
 
         switch (rBuffer[1])

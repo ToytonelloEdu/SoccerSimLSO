@@ -431,7 +431,7 @@ int AskForRematch(struct referee* Ref)
     pthread_create(&a, NULL, AskCaptain, (void*) Ref->teamA.captain);
     pthread_create(&a, NULL, AskCaptain, (void*) Ref->teamB.captain);
     
-    while(answA == -1 && answB == -1);
+    while(answA == -1 || answB == -1);
 
     if(answA && answB)
         RestartGame(Ref);

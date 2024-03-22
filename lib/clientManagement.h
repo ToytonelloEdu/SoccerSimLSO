@@ -103,19 +103,19 @@ void sendMSGtoAllClients(struct referee Ref, char* msg)
 
 int sendMSG(int socket, char* msg)
 {
-    char buff[BUFFSIZE] = "(0)";
+    char buff[BUFFSIZE] = "[0]";
     strcat(buff, msg);
     return write(socket, buff, strlen(buff));
 }
 int askMSG(int socket, char* msg)
 {
-    char buff[BUFFSIZE] = "(1)";
+    char buff[BUFFSIZE] = "[1]";
     strcat(buff, msg);
     return write(socket, buff, strlen(buff));
 }
 int sendMSGnoRet(int socket, char* msg)
 {
-    char buff[BUFFSIZE] = "(2)";
+    char buff[BUFFSIZE] = "[2]";
     strcat(buff, msg);
     return write(socket, buff, strlen(buff));
 }
@@ -126,7 +126,7 @@ char* errors[] =  {"Wrong Input"};
 
 int sendErrorMSG(int socket, enum errType eErr, char* msg)
 {
-    char buff[BUFFSIZE] = "(3)";
+    char buff[BUFFSIZE] = "[3]";
     sprintf(buff, "%s%s", buff, errors[eErr]);
     if (strlen(msg) > 0) {strcat(buff, ": "), strcat(buff, msg);}
     return write(socket, buff, strlen(buff));
@@ -134,7 +134,7 @@ int sendErrorMSG(int socket, enum errType eErr, char* msg)
 
 int sendExitMSG(int socket, char* msg)
 {
-    char buff[BUFFSIZE] = "(9)";
+    char buff[BUFFSIZE] = "[9]";
     strcat(buff, msg);
     return write(socket, buff, strlen(buff));
 }
