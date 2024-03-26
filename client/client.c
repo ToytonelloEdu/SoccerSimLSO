@@ -18,6 +18,13 @@
 char* names[10] = {"Antonio", "Ciro", "Fortunato", "Matteo", "Luigi", "Donato", "Vincenzo", "Alessandro", "Francesco", "Arturo"};
 int numbers[10] = {35, 7, 9, 3, 11, 10, 24, 14, 18, 99};
 
+void delay(int num_of_seconds)
+    {
+        int milliseconds = 1000 * num_of_seconds;
+        clock_t start = clock();
+        while(clock() < start + milliseconds){}
+    }
+
 int main(int argc, char* argv[])
 {
     printf("Welcome to LSOccer Simulator's Client!\n");
@@ -57,7 +64,7 @@ int main(int argc, char* argv[])
         
         for(int i = 0; i < strlen(printBuff); i++)
         {
-            if(printBuff[i] = '[') i= i+3;
+            if(printBuff[i] == '[') i= i+3;
             printf("%c", printBuff[i]);
         }
 
@@ -71,7 +78,7 @@ int main(int argc, char* argv[])
             fgets(wBuffer, BUFFSIZE, stdin);
             write(sock_fd, wBuffer, strlen(wBuffer));
             break;
-        case '2': NULL;
+        case '2':
             break;
         case '3':
             write(sock_fd, "CLI_ERROR", 10);

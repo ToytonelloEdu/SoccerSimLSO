@@ -381,12 +381,12 @@ int answA =  -1, answB = -1;
 
 void* AskCaptain(void* Player)
 {
+    printf("Dentro al thread\n");
     struct player* currPlayer = (struct player*) Player; int* answ;
 
     if(currPlayer->team == 'A') answ = &answA;
     else if (currPlayer->team == 'B') answ = &answB;
     else {printf("Non c'è il carattere team\n") ;pthread_exit(NULL);}
-    
     char buffer[BUFFSIZE];
     askMSG(currPlayer->FD, "Do you want to accept the rematch? (Y/N): ");
     read(currPlayer->FD, buffer, BUFFSIZE);
@@ -425,11 +425,13 @@ void DisbandGame(struct referee* Ref)
 
 int AskForRematch(struct referee* Ref)
 {
+    answA = answB = -1;
     sendMSGtoAllClients(*Ref, "Asking captains for a rematch\n");
     printf("Asking captains for a rematch\n");
+    sleep(1);
     pthread_t a, b;
     pthread_create(&a, NULL, AskCaptain, (void*) Ref->teamA.captain);
-    pthread_create(&a, NULL, AskCaptain, (void*) Ref->teamB.captain);
+    pthread_create(&b, NULL, AskCaptain, (void*) Ref->teamB.captain);
     
     while(answA == -1 || answB == -1);
 

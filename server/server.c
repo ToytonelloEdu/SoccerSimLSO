@@ -142,9 +142,9 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                     selectAction(currPlayer);
                 }
             }
-
-            while(Ref.gameStatus < gameDisbanded);
-
+            
+            while(Ref.gameStatus != gameDisbanded && Ref.gameStatus != gameRestarting);
+            
         }
         
         sendExitMSG(sockFD, "Thanks for playing!!");

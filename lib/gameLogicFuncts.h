@@ -11,10 +11,10 @@
 #include "clientManagement.h"
 #include "serverManagement.h"
 
-#define DURATION 10
+#define DURATION 20
 #define ACT_INTERVAL 5
 #define ACT_COOLDOWN 2
-#define INJ_TIME_MOD 2
+#define INJ_TIME_MOD 5
 #define INJ_TIME_BASE 2
 
 struct actsProb;
