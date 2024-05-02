@@ -16,6 +16,8 @@
 #define ACT_COOLDOWN 2
 #define INJ_TIME_MOD 5
 #define INJ_TIME_BASE 2
+#define PEN_TIME_MOD 5
+#define PEN_TIME_BASE 2
 
 struct actsProb;
 struct resProb;
@@ -144,6 +146,11 @@ typedef int ball;
         return (rand() % INJ_TIME_MOD + 1) + INJ_TIME_BASE;
     }
 
+    int getPenaltyTime()
+    {
+        return (rand() % PEN_TIME_MOD + 1) + PEN_TIME_BASE;
+    }
+
     void getInjuryMSG(char* msg, struct player* player, int mins)
     {
         if(player->resumePlay <= DURATION)
@@ -156,7 +163,18 @@ typedef int ball;
     {
         int mins = getInjuryTime();
 
-        player->resumePlay = (Ref->time) + mins; 
+        player->resumePlay = (Ref->time) + mins;
+
+        int num = rand() % TEAMSIZE;
+        struct player playerBad;
+        if(player->teamName == Ref->teamA.teamName){
+            playerBad = Ref->teamB.members[num];
+        } else {
+            playerBad = Ref->teamA.members[num];
+        }
+
+        int minspen = getPenaltyTime();
+        playerBad.resumePlay = (Ref->time) + minspen; 
 
         getInjuryMSG(msg, player, mins);
         sendMSGtoAllOutputs(*Ref, msg);
