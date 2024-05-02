@@ -26,6 +26,7 @@ void Dribbling(struct referee* Ref, struct player* player, char* msg, struct res
 void Shot(struct referee* Ref, struct player* player, char* msg, struct resProb resP);
 void Goal(struct referee* Ref, struct player* player, char* msg);
 void Injury(struct referee* Ref, struct player* player, char* msg);
+void Penalize(struct referee* Ref, char team);
 void addShotFailed(struct stats* stats);
 void addDribbling(struct stats* stats);
 
@@ -146,11 +147,6 @@ typedef int ball;
         return (rand() % INJ_TIME_MOD + 1) + INJ_TIME_BASE;
     }
 
-    int getPenaltyTime()
-    {
-        return (rand() % PEN_TIME_MOD + 1) + PEN_TIME_BASE;
-    }
-
     void getInjuryMSG(char* msg, struct player* player, int mins)
     {
         if(player->resumePlay <= DURATION)
@@ -159,25 +155,37 @@ typedef int ball;
             {sprintf(msg, "%s\tInjured until end of the game.\n", msg);}
     }
 
+    int getPenaltyTime()
+    {
+        return (rand() % PEN_TIME_MOD + 1) + PEN_TIME_BASE;
+    }
+
     void Injury(struct referee* Ref, struct player* player, char* msg)
     {
         int mins = getInjuryTime();
-
+        
         player->resumePlay = (Ref->time) + mins;
-
-        int num = rand() % TEAMSIZE;
-        struct player playerBad;
-        if(player->teamName == Ref->teamA.teamName){
-            playerBad = Ref->teamB.members[num];
-        } else {
-            playerBad = Ref->teamA.members[num];
-        }
-
-        int minspen = getPenaltyTime();
-        playerBad.resumePlay = (Ref->time) + minspen; 
+        Penalize(Ref, player->team);
 
         getInjuryMSG(msg, player, mins);
         sendMSGtoAllOutputs(*Ref, msg);
+    }
+
+    void Penalize(struct referee* Ref, char team)
+    {
+        int PenPlayerIndex = rand() % TEAMSIZE;
+        struct player penPlayer;
+
+        if(team == 'A'){
+            penPlayer = Ref->teamB.members[PenPlayerIndex];
+        } else if (team == 'B') {
+            penPlayer = Ref->teamA.members[PenPlayerIndex];
+        } else {
+            printf("Errore nella penalità.\n");
+        }
+
+        int minspen = getPenaltyTime();
+        penPlayer.resumePlay = (Ref->time) + minspen; 
     }
     
     void addDribbling(struct stats* stats) { stats -> numberDribbling++; }
