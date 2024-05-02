@@ -29,28 +29,29 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
     void selectAction(struct player* player)
     {
         wait(&S);
-        
-            char buffer[BUFFSIZE] = "";
-            PlayerToString(buffer, *player);
-
-            switch (getRandomAction(defaultProbs))
+            if(player->resumePlay <= Ref.time)
             {
-            case eShot:      
-                Shot(&Ref, player, buffer, defShotProb);
-                break;
-            case eDribble: 
-                Dribbling(&Ref, player, buffer, defDribbleProb);           
-                break;
-            case eInjury:    
-                Injury(&Ref, player, buffer);            
-                break;
-            default: 
-                sendErrorMSG(player->FD, wrongInput, "");
-                break;
+                char buffer[BUFFSIZE] = "";
+                PlayerToString(buffer, *player);
+
+                switch (getRandomAction(defaultProbs))
+                {
+                case eShot:      
+                    Shot(&Ref, player, buffer, defShotProb);
+                    break;
+                case eDribble: 
+                    Dribbling(&Ref, player, buffer, defDribbleProb);           
+                    break;
+                case eInjury:    
+                    Injury(&Ref, player, buffer);            
+                    break;
+                default: 
+                    sendErrorMSG(player->FD, wrongInput, "");
+                    break;
+                }
+
+                sleep(ACT_INTERVAL);
             }
-
-            sleep(ACT_INTERVAL);
-
         signal(&S);
         sleep(ACT_COOLDOWN);
     }
@@ -147,7 +148,7 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
             
         }
         
-        sendExitMSG(sockFD, "Thanks for playing!!");
+        sendExitMSG(sockFD, "Thanks for playing!!\n");
 
     }
 

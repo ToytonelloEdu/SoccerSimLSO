@@ -381,7 +381,6 @@ int answA =  -1, answB = -1;
 
 void* AskCaptain(void* Player)
 {
-    printf("Dentro al thread\n");
     struct player* currPlayer = (struct player*) Player; int* answ;
 
     if(currPlayer->team == 'A') answ = &answA;

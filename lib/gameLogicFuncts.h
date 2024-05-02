@@ -26,7 +26,7 @@ void Dribbling(struct referee* Ref, struct player* player, char* msg, struct res
 void Shot(struct referee* Ref, struct player* player, char* msg, struct resProb resP);
 void Goal(struct referee* Ref, struct player* player, char* msg);
 void Injury(struct referee* Ref, struct player* player, char* msg);
-void Penalize(struct referee* Ref, char team);
+void Penalize(struct referee* Ref, char oppTeam, char* msg);
 void addShotFailed(struct stats* stats);
 void addDribbling(struct stats* stats);
 
@@ -155,37 +155,67 @@ typedef int ball;
             {sprintf(msg, "%s\tInjured until end of the game.\n", msg);}
     }
 
-    int getPenaltyTime()
-    {
-        return (rand() % PEN_TIME_MOD + 1) + PEN_TIME_BASE;
-    }
-
     void Injury(struct referee* Ref, struct player* player, char* msg)
     {
         int mins = getInjuryTime();
         
         player->resumePlay = (Ref->time) + mins;
-        Penalize(Ref, player->team);
 
         getInjuryMSG(msg, player, mins);
+        Penalize(Ref, player->team, msg);
         sendMSGtoAllOutputs(*Ref, msg);
     }
 
-    void Penalize(struct referee* Ref, char team)
+    int getPenaltyTime()
     {
-        int PenPlayerIndex = rand() % TEAMSIZE;
-        struct player penPlayer;
+        return (rand() % PEN_TIME_MOD + 1) + PEN_TIME_BASE;
+    }
 
-        if(team == 'A'){
-            penPlayer = Ref->teamB.members[PenPlayerIndex];
-        } else if (team == 'B') {
-            penPlayer = Ref->teamA.members[PenPlayerIndex];
-        } else {
+    int getPlayerBadIndex(int* time, struct team* team_getFrom)
+    {
+        int index = 0;
+        while(1)
+        {
+            index = rand() % TEAMSIZE;
+            struct player* player = & team_getFrom->members[index];
+            if(player->resumePlay < *time)
+            {
+                return index;
+            }
+        }
+    }
+
+    void getPenaltyMSG(char* msg, struct player* player, int mins)
+    {
+        if(player->resumePlay <= DURATION)
+            {sprintf(msg, "%s\tPlayer %s penalized until min. %d (for %d minutes)\n", msg, player->name, player->resumePlay, mins);} 
+        else 
+            {sprintf(msg, "%s\tPlayer %s expelled from the game.\n", msg, player->name);}
+    }    
+
+    void Penalize(struct referee* Ref, char oppTeam, char* msg)
+    {
+        int playerBad_Index;
+        struct player* playerBad;
+
+        if(oppTeam == 'A') 
+        {
+            playerBad_Index = getPlayerBadIndex(&(Ref->time), &(Ref->teamB));
+            playerBad = & Ref->teamB.members[playerBad_Index];
+        } 
+        else if (oppTeam == 'B') 
+        {
+            playerBad_Index = getPlayerBadIndex(&(Ref->time) ,&(Ref->teamA));
+            playerBad = & Ref->teamA.members[playerBad_Index];
+        } 
+        else 
+        {
             printf("Errore nella penalità.\n");
         }
 
-        int minspen = getPenaltyTime();
-        penPlayer.resumePlay = (Ref->time) + minspen; 
+        int penMins = getPenaltyTime();
+        playerBad->resumePlay = (Ref->time) + penMins; 
+        getPenaltyMSG(msg, playerBad, penMins);
     }
     
     void addDribbling(struct stats* stats) { stats -> numberDribbling++; }
