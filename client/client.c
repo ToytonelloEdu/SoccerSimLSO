@@ -15,9 +15,6 @@
 
 #define BUFFSIZE 512
 
-char* names[10] = {"Antonio", "Ciro", "Fortunato", "Matteo", "Luigi", "Donato", "Vincenzo", "Alessandro", "Francesco", "Arturo"};
-int numbers[10] = {35, 7, 9, 3, 11, 10, 24, 14, 18, 99};
-
 void delay(int num_of_seconds)
     {
         int milliseconds = 1000 * num_of_seconds;
