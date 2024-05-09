@@ -15,13 +15,6 @@
 
 #define BUFFSIZE 512
 
-void delay(int num_of_seconds)
-    {
-        int milliseconds = 1000 * num_of_seconds;
-        clock_t start = clock();
-        while(clock() < start + milliseconds){}
-    }
-
 int main(int argc, char* argv[])
 {
     printf("Welcome to LSOccer Simulator's Client!\n");
@@ -29,7 +22,7 @@ int main(int argc, char* argv[])
     int sock_fd, status;
     struct sockaddr_in servaddr;
 
-    if((sock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
+    if ((sock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
     {
         perror("Failed to create socket");
         exit(EXIT_FAILURE);
@@ -39,13 +32,12 @@ int main(int argc, char* argv[])
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(12345);
-    if(argc == 2) { servaddr.sin_addr.s_addr = inet_addr(argv[1]); }
+    if (argc == 2) { servaddr.sin_addr.s_addr = inet_addr(argv[1]); }
     else { perror("Address"); exit(1); }
     
-
     int n;
     
-    if(status = connect(sock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
+    if (status = connect(sock_fd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
     {
         perror("client");
         exit(EXIT_FAILURE);
@@ -67,28 +59,28 @@ int main(int argc, char* argv[])
 
         switch (rBuffer[1])
         {
-        case '0':
-            write(sock_fd, "", 1);
-            break;
-        case '1':
-            char wBuffer[BUFFSIZE];
-            fgets(wBuffer, BUFFSIZE, stdin);
-            write(sock_fd, wBuffer, strlen(wBuffer));
-            break;
-        case '2':
-            break;
-        case '3':
-            write(sock_fd, "CLI_ERROR", 10);
-            break;
-        case '9':
-            rdout = -1;
-            break;
-        
-        default: write(sock_fd, "SRV_ERROR", 10);
-            break;
+            case '0':
+                write(sock_fd, "", 1);
+                break;
+            case '1':
+                char wBuffer[BUFFSIZE];
+                fgets(wBuffer, BUFFSIZE, stdin);
+                write(sock_fd, wBuffer, strlen(wBuffer));
+                break;
+            case '2':
+                break;
+            case '3':
+                write(sock_fd, "CLI_ERROR", 10);
+                break;
+            case '9':
+                rdout = -1;
+                break;
+            
+            default: write(sock_fd, "SRV_ERROR", 10);
+                break;
         }
-        
-    }while(rdout > -1);
+
+    } while(rdout > -1);
 
     close(sock_fd);
 
