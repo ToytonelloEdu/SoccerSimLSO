@@ -67,16 +67,17 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                 Ref.gameStatus = oneCaptainNeeded;
                     currPlayer = Ref.teamA.captain;
 
-                    sendMSG(sockFD, "Inizio creazione partita\n\n"); read(sockFD, buffer, BUFFSIZE);
-                        setBuff(buffer, "");
+                    sendMSG(sockFD, "Inizio creazione partita\n\n");
+                    read(sockFD, buffer, BUFFSIZE);
+                    setBuff(buffer, "");
 
-                    TeamCaptainInitialization(sockFD, buffer,&Ref, currPlayer, 'A');
+                    TeamCaptainInitialization(sockFD, buffer, &Ref, currPlayer, 'A');
                     Ref.teamA.membNum++;
 
                     MatchPresentation(sockFD, buffer, Ref);
                     printf("%s", buffer);
                     
-                        setBuff(buffer, "");
+                    setBuff(buffer, "");
                     
                     TeamMemberAcceptance(sockFD, buffer, & Ref.teamA, "A", & QueueA, pipe_A[1]); //capitano accetta giocatori
 
@@ -96,7 +97,7 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                     
                     MatchPresentation(sockFD, buffer, Ref);
 
-                        setBuff(buffer, "");
+                    setBuff(buffer, "");
 
                     TeamMemberAcceptance(sockFD, buffer, & Ref.teamB, "B", & QueueB, pipe_B[1]); //capitano accetta giocatori
 
@@ -109,7 +110,8 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                 WaitCaptains(sockFD, buffer, &Ref);
                 MatchPresentation(sockFD, buffer, Ref);
 
-                    sendMSG(sockFD, "\nCrea il tuo giocatore!\n"); read(sockFD, buffer, BUFFSIZE);
+                sendMSG(sockFD, "\nCrea il tuo giocatore!\n");
+                read(sockFD, buffer, BUFFSIZE);
                 
                 struct player tmpPlayer;
                 NewPlayerInitialization(sockFD, buffer, &tmpPlayer);
@@ -119,12 +121,12 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                 
                 switch (TeamRequestChoice(sockFD, buffer, & Ref)) //nuovo giocatore si pone in coda per entrare in una squadra
                 {
-                case 1 : currPlayer = TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueA, pipe_A[0]);
-                    break;
-                case 2 : currPlayer = TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueB, pipe_B[0]);
-                    break;
-                default : sendErrorMSG(sockFD, wrongInput, "choose between teams A and B");
-                    break;
+                    case 1 : currPlayer = TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueA, pipe_A[0]);
+                        break;
+                    case 2 : currPlayer = TeamMemberRequest(sockFD, & Ref, & tmpPlayer, & QueueB, pipe_B[0]);
+                        break;
+                    default : sendErrorMSG(sockFD, wrongInput, "choose between teams A and B");
+                        break;
                 }
 
                 WaitFullTeams(sockFD, buffer, &Ref);
@@ -132,7 +134,8 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
         
         while(Ref.gameStatus != gameDisbanded)
         {
-            sendMSG(sockFD, "Tutto pronto: INIZIA LA PARTITA\n\n"); read(sockFD, buffer, BUFFSIZE);    
+            sendMSG(sockFD, "Tutto pronto: INIZIA LA PARTITA\n\n");
+            read(sockFD, buffer, BUFFSIZE);    
             while(Ref.time < 0);
 
             while(Ref.time < DURATION)
@@ -198,10 +201,15 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
         int wsock_fd, new_socket;
         int opt = 1;
         struct sockaddr_in servaddr, cliaddr;
-        createPipe(pipe_A); createPipe(pipe_B); srand(time(NULL));
-        InitReferee(&Ref);initTeam(&(Ref.teamA));initTeam(&(Ref.teamB));
+        createPipe(pipe_A);
+        createPipe(pipe_B);
+        srand(time(NULL));
+        InitReferee(&Ref);
+        initTeam(&(Ref.teamA));
+        initTeam(&(Ref.teamB));
         pthread_create(& Ref.clockThread, NULL, MatchClockThread, NULL);
-        pthread_detach(Ref.clockThread); pthread_setschedprio(Ref.clockThread, 10);
+        pthread_detach(Ref.clockThread);
+        pthread_setschedprio(Ref.clockThread, 10);
         
         if((wsock_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
         { perror("Failed to create socket"); exit(EXIT_FAILURE); }
@@ -209,7 +217,8 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
         if(setsockopt(wsock_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
         { perror("setsockopt failed"); exit(EXIT_FAILURE); }
 
-        memset(&servaddr, 0, sizeof(servaddr)); memset(&cliaddr, 0, sizeof(cliaddr));
+        memset(&servaddr, 0, sizeof(servaddr));
+        memset(&cliaddr, 0, sizeof(cliaddr));
 
         servaddr.sin_family = AF_INET;
         servaddr.sin_port = htons(12345);

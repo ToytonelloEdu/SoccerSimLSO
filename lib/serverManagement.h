@@ -59,6 +59,7 @@ char TeamRequestChoice(int sockFD, char buffer[], struct referee* Ref);
 struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player* newPlayer,struct playerQueue* Queue, int pipeRead);
 void TeamMemberAcceptance(int sockFD, char buffer[], struct team* Team, char* teamStr , struct playerQueue* Queue, int pipeWrite);
 //
+char checkTeamChoice(int sockFD, char teamChoice, struct referee* Ref);
 
 void sendMSGtoAllOutputs(struct referee Ref, char msg[])
 {
@@ -69,31 +70,31 @@ void sendMSGtoAllOutputs(struct referee Ref, char msg[])
 //LOG FUNCTIONS
 
 void writeLog(char* path, char* msg)
-    {
-        FILE* fp = fopen(path, "a");
-        fwrite(msg, sizeof(char), strlen(msg), fp);
-        fclose(fp);
-    }
+{
+    FILE* fp = fopen(path, "a");
+    fwrite(msg, sizeof(char), strlen(msg), fp);
+    fclose(fp);
+}
 
 void printStatsOfMAtch(struct referee Ref, char EndOfGameMSG[])
-    {
-        writeLog(Ref.pathLogServer, EndOfGameMSG);
-        writeLog(Ref.pathLogServer, "\nStatistiche della partita:\n");
-        char msg[BUFFSIZE] = "";
-        int totalGoal = Ref.stats.numberGoalA + Ref.stats.numberGoalB;
-        
-        sprintf(msg, "GOAL segnati nel match: %d\n", totalGoal);
-        writeLog(Ref.pathLogServer, msg);
-        setBuff(msg, "");
-        
-        sprintf(msg, "SHOT falliti nel match: %d\n", Ref.stats.shotFailed);
-        writeLog(Ref.pathLogServer, msg);
-        setBuff(msg, "");
+{
+    writeLog(Ref.pathLogServer, EndOfGameMSG);
+    writeLog(Ref.pathLogServer, "\nStatistiche della partita:\n");
+    char msg[BUFFSIZE] = "";
+    int totalGoal = Ref.stats.numberGoalA + Ref.stats.numberGoalB;
+    
+    sprintf(msg, "GOAL segnati nel match: %d\n", totalGoal);
+    writeLog(Ref.pathLogServer, msg);
+    setBuff(msg, "");
+    
+    sprintf(msg, "SHOT falliti nel match: %d\n", Ref.stats.shotFailed);
+    writeLog(Ref.pathLogServer, msg);
+    setBuff(msg, "");
 
-        sprintf(msg, "DRIBBLING effettuati nel match: %d\n", Ref.stats.numberDribbling);
-        writeLog(Ref.pathLogServer, msg);
-        setBuff(msg, "");
-    }
+    sprintf(msg, "DRIBBLING effettuati nel match: %d\n", Ref.stats.numberDribbling);
+    writeLog(Ref.pathLogServer, msg);
+    setBuff(msg, "");
+}
 
 //OUTPUTS FUNCTIONS
 void sendMinuteToAllOutputs(struct referee Ref)
@@ -130,7 +131,9 @@ void captainConfirmation(int sockFD, char buffer[], struct player* newCapt)
     setBuff(buffer, "");
         
     sprintf(buffer, "Il capitano della squadra %s è %s con numero %d\n", newCapt->teamName, newCapt->name, newCapt->shirtNumber);
-    printf("%s", buffer); sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE); 
+    printf("%s", buffer);
+    sendMSG(sockFD, buffer);
+    read(sockFD, buffer, BUFFSIZE); 
 }
 
 void MatchStart(struct referee* Ref)
@@ -159,19 +162,18 @@ void MatchFinish(char buffer[], struct referee* Ref)
 
 void TeamCaptainInitialization(int sockFD, char buffer[], struct referee* Ref, struct player* currPlayer, char team)
 {    
-
     getTeamName(sockFD, buffer, Ref, team);
 
     NewPlayerInitialization(sockFD, buffer, currPlayer);
 
-        setBuff(buffer, "");
+    setBuff(buffer, "");
 
-    if (team == 'A') { setPlayerTeam(currPlayer, 'A', Ref->teamA.teamName);}
-    if (team == 'B') { setPlayerTeam(currPlayer, 'B', Ref->teamB.teamName);}
+    if (team == 'A') { setPlayerTeam(currPlayer, 'A', Ref->teamA.teamName); }
+    if (team == 'B') { setPlayerTeam(currPlayer, 'B', Ref->teamB.teamName); }
 
     captainConfirmation(sockFD, buffer, currPlayer);
     
-        setBuff(buffer, "");
+    setBuff(buffer, "");
 
     while(Ref->gameStatus == oneCaptainNeeded);
     Ref->gameStatus--;
@@ -182,33 +184,32 @@ void TeamCaptainInitialization(int sockFD, char buffer[], struct referee* Ref, s
 void askTeamName(int sockFD, char buffer[], char name[], char team)
 {
     sprintf(buffer, "Inserisci nome squadra %c: ", team);
-    askMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+    askMSG(sockFD, buffer);
+    read(sockFD, buffer, BUFFSIZE);
     strcpy_noNL(name, buffer);
 }
 
 void getTeamName(int sockFD, char buffer[], struct referee* Ref, char team)
 {
-        sprintf(buffer, "Sei il capitano della squadra %c\n", team);
-        sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
-        
-            setBuff(buffer, "");
+    sprintf(buffer, "Sei il capitano della squadra %c\n", team);
+    sendMSG(sockFD, buffer);
+    read(sockFD, buffer, BUFFSIZE);
+    
+    setBuff(buffer, "");
 
-        char name[NAMESIZE];
+    char name[NAMESIZE];
+    askTeamName(sockFD, buffer, name, team);
+
+    while(ValidName(name) == 0)
+    {
+        sendErrorMSG(sockFD, wrongInput, "team name not valid, must be a word with Capital initial and no numbers\n");
+        read(sockFD, buffer, BUFFSIZE);
+        setBuff(buffer, ""); 
         askTeamName(sockFD, buffer, name, team);
+    }      
 
-            while(ValidName(name) == 0)
-            {
-                sendErrorMSG(sockFD, wrongInput, "team name not valid, must be a word with Capital initial and no numbers\n");
-                read(sockFD, buffer, BUFFSIZE); setBuff(buffer, ""); 
-                askTeamName(sockFD, buffer, name, team);
-            } 
-       
-        
-
-        if(team == 'A') {strcpy_noNL(Ref->teamA.teamName, name); printf("La squadra %c è %s\n", team, Ref->teamA.teamName);}
-        if(team == 'B') {strcpy_noNL(Ref->teamB.teamName, name); printf("La squadra %c è %s\n", team, Ref->teamB.teamName);}
-
-          
+    if(team == 'A') {strcpy_noNL(Ref->teamA.teamName, name); printf("La squadra %c è %s\n", team, Ref->teamA.teamName);}
+    if(team == 'B') {strcpy_noNL(Ref->teamB.teamName, name); printf("La squadra %c è %s\n", team, Ref->teamB.teamName);}          
 }
 
 void WaitCaptains(int sockFD, char buffer[], struct referee* Ref)
@@ -242,16 +243,16 @@ void NewPlayerInitialization(int sockFD, char buffer[], struct player* newPlayer
 {
     setBuff(buffer, "");
 
-        char name[NAMESIZE];
-        getPlayerName(sockFD, buffer, name); 
+    char name[NAMESIZE];
+    getPlayerName(sockFD, buffer, name); 
 
-        char sNum[5];
-        int num = getPlayerNumber(sockFD, buffer, sNum);
+    char sNum[5];
+    int num = getPlayerNumber(sockFD, buffer, sNum);
 
-            setBuff(buffer, "");
-    
-        initPlayer(newPlayer, name, num);
-        setPlayerSysVar(newPlayer, sockFD, syscall(__NR_gettid));
+    setBuff(buffer, "");
+
+    initPlayer(newPlayer, name, num);
+    setPlayerSysVar(newPlayer, sockFD, syscall(__NR_gettid));
 }
 
 //PLAYERS DATA FUNCTIONS
@@ -269,12 +270,11 @@ void getPlayerName(int sockFD, char buffer[], char name[NAMESIZE])
 
     askName(sockFD, buffer, name);
     while(! ValidName(name))
-        {
-            sendErrorMSG(sockFD, wrongInput, "name not valid, must be a word with Capital initial and no numbers\n");
-            read(sockFD, buffer, BUFFSIZE); setBuff(buffer, ""); 
-            askName(sockFD, buffer, name);
-        }
-             
+    {
+        sendErrorMSG(sockFD, wrongInput, "name not valid, must be a word with Capital initial and no numbers\n");
+        read(sockFD, buffer, BUFFSIZE); setBuff(buffer, ""); 
+        askName(sockFD, buffer, name);
+    }             
 }
 
 void askNumber(int sockFD, char buffer[], char sNum[5])
@@ -304,9 +304,12 @@ int getPlayerNumber(int sockFD, char buffer[], char sNum[5])
 
 char ChooseMemberRequest(int sockFD, char buffer[], struct playerQueue* Queue)
 {
-    sendMSG(sockFD, "Un giocatore ha richiesto di entrare nella tua squadra\n"); read(sockFD, buffer, BUFFSIZE);
-    setBuff(buffer, qHead(Queue)->name); strcat(buffer, ", lo vuoi accettare? (Y/N)\n");
-    askMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+    sendMSG(sockFD, "Un giocatore ha richiesto di entrare nella tua squadra\n");
+    read(sockFD, buffer, BUFFSIZE);
+    setBuff(buffer, qHead(Queue)->name);
+    strcat(buffer, ", lo vuoi accettare? (Y/N)\n");
+    askMSG(sockFD, buffer);
+    read(sockFD, buffer, BUFFSIZE);
 
     return buffer[0];
 }
@@ -333,49 +336,95 @@ void TeamMemberAcceptance(int sockFD, char buffer[], struct team* Team, char* te
 
         switch (ChooseMemberRequest(sockFD, buffer, Queue))
         {
-        case 'Y': newMemberAccepted(sockFD, buffer, Team, teamStr , Queue, pipeWrite); 
-                  qNext(Queue); 
-            break;
-        case 'N': newMemberRejected(sockFD, buffer, Team, teamStr , Queue, pipeWrite); 
-                  qNext(Queue); 
-            break;
-        default : sendErrorMSG(sockFD, wrongInput, "only accepted answers are Y and N\n"); read(sockFD, buffer, BUFFSIZE);
-            break;
+            case 'Y': newMemberAccepted(sockFD, buffer, Team, teamStr , Queue, pipeWrite); 
+                    qNext(Queue); 
+                break;
+            case 'N': newMemberRejected(sockFD, buffer, Team, teamStr , Queue, pipeWrite); 
+                    qNext(Queue); 
+                break;
+            default : sendErrorMSG(sockFD, wrongInput, "only accepted answers are Y and N\n"); read(sockFD, buffer, BUFFSIZE);
+                break;
         }             
     }
 }
 
 char TeamRequestChoice(int sockFD, char buffer[], struct referee* Ref)
-    {
-        char ansBuff[BUFFSIZE];
+{
+    char ansBuff[BUFFSIZE];
 
-        sprintf(buffer, "1-> %s; 2-> %s\n", Ref->teamA.teamName, Ref->teamB.teamName);
-        sendMSG(sockFD, buffer); read(sockFD, buffer, BUFFSIZE);
+    sprintf(buffer, "1-> %s; 2-> %s\n", Ref->teamA.teamName, Ref->teamB.teamName);
+    sendMSG(sockFD, buffer);
+    read(sockFD, buffer, BUFFSIZE);
 
-        setBuff(buffer, "");
+    setBuff(buffer, "");
+
+    askMSG(sockFD, "Decidi di che squadra vorresti far parte: "); 
+    read(sockFD, ansBuff, BUFFSIZE);
+    char teamChoice = atoi(ansBuff);
+
+    return checkTeamChoice(sockFD, teamChoice, Ref);
+}
+
+char checkTeamChoice(int sockFD, char teamChoice, struct referee* Ref)
+{
+    char buffer[BUFFSIZE];
+    while(1)
+    {            
+        if (teamChoice == 1) 
+        {   
+            if (Ref->teamA.membNum == TEAMSIZE)
+            {
+                sprintf(buffer, "La squadra %s è al completo, seleziona l'altra squadra.\n", Ref->teamA.teamName);
+                sendMSG(sockFD, buffer);
+                read(sockFD, buffer, BUFFSIZE);
+                setBuff(buffer, "");
+            } 
+            else {
+                return teamChoice;
+            }
+        } 
+        else if (teamChoice == 2)
+        {
+            if (Ref->teamB.membNum == TEAMSIZE)
+            {
+                sprintf(buffer, "La squadra %s è al completo, seleziona l'altra squadra.\n", Ref->teamB.teamName);
+                sendMSG(sockFD, buffer);
+                read(sockFD, buffer, BUFFSIZE);
+                setBuff(buffer, "");
+            } 
+            else {
+                return teamChoice;
+            }
+        } 
+        else
+        {
+            sprintf(buffer, "Inserisci 1 oppure 2.\n");
+            sendMSG(sockFD, buffer);
+            read(sockFD, buffer, BUFFSIZE);
+            setBuff(buffer, "");                
+        }
 
         askMSG(sockFD, "Decidi di che squadra vorresti far parte: "); 
-        read(sockFD, ansBuff, BUFFSIZE);
-        char teamChoice = atoi(ansBuff);
-
-        return teamChoice;
+        read(sockFD, buffer, BUFFSIZE);
+        teamChoice = atoi(buffer);
     }
+}
 
 struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player* newPlayer,struct playerQueue* Queue, int pipeRead)
-    {
-            char buffer[BUFFSIZE];
-            struct player* retPlayerPTR = 0;
+{
+    char buffer[BUFFSIZE];
+    struct player* retPlayerPTR = 0;
 
-            
-                qInsert(Queue, newPlayer);
-                char msg [25]; recvTeamResponseByPipe(pipeRead, Ref, &retPlayerPTR, msg);
-                sendMSG(sockFD, msg); read(sockFD, buffer, BUFFSIZE);
+    
+        qInsert(Queue, newPlayer);
+        char msg [25]; recvTeamResponseByPipe(pipeRead, Ref, &retPlayerPTR, msg);
+        sendMSG(sockFD, msg); read(sockFD, buffer, BUFFSIZE);
 
 
-            setBuff(buffer, "");
+    setBuff(buffer, "");
 
-            return retPlayerPTR;
-    }
+    return retPlayerPTR;
+}
 
 int answA =  -1, answB = -1;
 

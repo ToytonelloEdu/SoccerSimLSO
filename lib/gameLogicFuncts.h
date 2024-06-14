@@ -11,9 +11,9 @@
 #include "clientManagement.h"
 #include "serverManagement.h"
 
-#define DURATION 20
-#define ACT_INTERVAL 5
-#define ACT_COOLDOWN 2
+#define DURATION 90
+#define ACT_INTERVAL 3
+#define ACT_COOLDOWN 10
 #define INJ_TIME_MOD 5
 #define INJ_TIME_BASE 2
 #define PEN_TIME_MOD 5
@@ -40,9 +40,7 @@ typedef int ball;
     }
 
     void signal(ball* mutex)
-    {
-        //if(*mutex != 0) {*mutex = 0;} //per provare a correggere errore quando entrano 2 thread nel semaforo??
-        
+    {        
         (*mutex)++;
     }
 
@@ -95,8 +93,7 @@ typedef int ball;
 
         if(valInBetween(0, val, resP.Numer)) return success;
 
-        return failure; 
-
+        return failure;
     }
 
     struct resProb defDribbleProb = {3,5};

@@ -6,12 +6,12 @@
 #include <pthread.h>
 #include <string.h>
 
-#define TEAMSIZE 2
+#define TEAMSIZE 5
 #define BUFFSIZE 512
 #define NAMESIZE 30
 #define PATHSIZE 54
 
-enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain , gameCreation , oneCaptainNeeded, gameRestarting, gameStarting, gameStarted, gameFinished, gameDisbanded};
+enum gameStatusEnum {nogame, gameCreated, waitingOtherCaptain, gameCreation, oneCaptainNeeded, gameRestarting, gameStarting, gameStarted, gameFinished, gameDisbanded};
 
 struct referee;
 struct team;
@@ -33,7 +33,7 @@ struct stats;
     {
         strncpy(player->name, name, NAMESIZE);
         player -> shirtNumber = shirtNum;
-        player->resumePlay = 0;
+        player -> resumePlay = 0;
     }
 
     void setPlayerTeam(struct player* player, char team, char* teamName)
@@ -85,8 +85,6 @@ struct stats;
     {
         team->captain = &(team->members[0]);
         team->membNum = 0;
-        /* for(int i = 0; i < TEAMSIZE; i++)
-            team->members[i].teamName = team->teamName; */
     }
 
     struct stats                       //struct modeling the stats of the game

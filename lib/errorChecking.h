@@ -67,4 +67,5 @@ int ValidNumber(char* str)
 enum errType {wrongInput};
 char* errors[] =  {"Wrong Input"};
  */
+
 #endif
