@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <string.h>
 
-#define TEAMSIZE 5
+#define TEAMSIZE 2
 #define BUFFSIZE 512
 #define NAMESIZE 30
 #define PATHSIZE 54
@@ -127,6 +127,11 @@ struct stats;
 
     void ResetRef(struct referee* referee)
     {
+        for(int i = 0; i < TEAMSIZE; i++)
+        {
+            referee->teamA.members[i].resumePlay = 0;
+            referee->teamB.members[i].resumePlay = 0;
+        }
         referee->gameStatus = gameRestarting;
         referee->time = -1;
         initStats(& referee->stats);

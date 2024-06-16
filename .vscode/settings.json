@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "inet.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "gamelogicfuncts.h": "c"
     }
 }

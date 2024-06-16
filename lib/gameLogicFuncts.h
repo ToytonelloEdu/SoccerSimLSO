@@ -14,10 +14,10 @@
 #define DURATION 90
 #define ACT_INTERVAL 5
 #define ACT_COOLDOWN 2
-#define INJ_TIME_MOD 5
-#define INJ_TIME_BASE 2
-#define PEN_TIME_MOD 5
-#define PEN_TIME_BASE 2
+#define INJ_TIME_MOD 20
+#define INJ_TIME_BASE 5
+#define PEN_TIME_MOD 20
+#define PEN_TIME_BASE 5
 
 struct actsProb;
 struct resProb;
@@ -61,7 +61,12 @@ typedef int ball;
         int Denom;
     };
 
-    struct actsProb defaultProbs = {40, 50, 10, 100};
+    #define SHOT_PROB 30
+    #define DRIB_PROB 65
+    #define INJ_PROB 5
+
+
+    struct actsProb defaultProbs = {SHOT_PROB, DRIB_PROB, INJ_PROB, 100};
 
     enum actions getRandomAction(struct actsProb actP)
     {
@@ -96,8 +101,8 @@ typedef int ball;
         return failure;
     }
 
-    struct resProb defDribbleProb = {3,5};
-    struct resProb defShotProb = {1,3};
+    struct resProb defDribbleProb = {2,5};
+    struct resProb defShotProb = {1,5};
 
     void Dribbling(struct referee* Ref, struct player* player, char* msg, struct resProb resP)
     {
