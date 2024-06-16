@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <string.h>
 
-#define TEAMSIZE 3
+#define TEAMSIZE 5
 #define BUFFSIZE 512
 #define NAMESIZE 30
 #define PATHSIZE 54
