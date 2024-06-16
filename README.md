@@ -1,4 +1,6 @@
-Repository for LSOccer Simulator project:
+Repository for LSOccer 
+=========
+Simulator project:
 contains all components of both Client and Server, with custom libraries and Dockerfile
 
 # How-to-use
