@@ -129,7 +129,6 @@ struct playerQueue QueueA = {0,0}, QueueB = {0,0};
                         break;
                 }
 
-                WaitFullTeams(sockFD, buffer, &Ref);
             }
         
         while(Ref.gameStatus != gameDisbanded)

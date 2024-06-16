@@ -66,29 +66,32 @@ void sendTeamResponseByPipe(int pipeWrite, char* response, char* team, char posi
     write(pipeWrite, buffer, strlen(buffer));
 }
 
-void recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** playerPTR, char  msg[25])
+int recvTeamResponseByPipe(int pipeRead, struct referee* Ref, struct player** playerPTR, char  msg[25])
 {
     char buffer[20];
 
     read(pipeRead, buffer, 20);
 
-    if(buffer[0] == '0') { sprintf(msg, "Rifiutato da team %c\n", buffer[2]);}
-
-    int pos = buffer[4] - 48;
-
-    if(buffer[2] == 'A') 
+    if(buffer[0] == '0') 
+    { 
+        sprintf(msg, "Rifiutato da team %c\n", buffer[2]);
+        return 0;
+    } else if(buffer[2] == 'A') 
     {
+        int pos = buffer[4] - 48;
         *playerPTR = &(Ref->teamA.members[pos]);
         setPlayerTeam(*playerPTR, 'A', Ref->teamA.teamName);
-    }
-    else if(buffer[2] == 'B')
+        sprintf(msg, "Accettato da team %c\n", buffer[2]);
+        return 1;
+    } else if(buffer[2] == 'B') 
     {
+        int pos = buffer[4] - 48;
         *playerPTR = &(Ref->teamB.members[pos]);
         setPlayerTeam(*playerPTR, 'B', Ref->teamB.teamName);
+        sprintf(msg, "Accettato da team %c\n", buffer[2]);
+        return 1;
     }
     
-
-    sprintf(msg, "Accettato da team %c\n", buffer[2]);
 }
 
 void sendMSGtoAllClients(struct referee Ref, char* msg)

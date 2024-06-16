@@ -12,8 +12,8 @@
 #include "serverManagement.h"
 
 #define DURATION 90
-#define ACT_INTERVAL 3
-#define ACT_COOLDOWN 10
+#define ACT_INTERVAL 5
+#define ACT_COOLDOWN 2
 #define INJ_TIME_MOD 5
 #define INJ_TIME_BASE 2
 #define PEN_TIME_MOD 5

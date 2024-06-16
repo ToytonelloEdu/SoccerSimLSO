@@ -416,13 +416,20 @@ struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player*
     struct player* retPlayerPTR = 0;
 
     
-        qInsert(Queue, newPlayer);
-        char msg [25]; recvTeamResponseByPipe(pipeRead, Ref, &retPlayerPTR, msg);
-        sendMSG(sockFD, msg); read(sockFD, buffer, BUFFSIZE);
+    qInsert(Queue, newPlayer);
+    char msg [25];
+    int response = recvTeamResponseByPipe(pipeRead, Ref, &retPlayerPTR, msg);
+    sendMSG(sockFD, msg); read(sockFD, buffer, BUFFSIZE);
 
 
     setBuff(buffer, "");
 
+    if(response == 1){
+        WaitFullTeams(sockFD, buffer, Ref);
+    } else {
+        pthread_exit(NULL);
+    }
+    
     return retPlayerPTR;
 }
 
