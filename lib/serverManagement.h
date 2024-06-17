@@ -410,7 +410,7 @@ char checkTeamChoice(int sockFD, char teamChoice, struct referee* Ref)
     }
 }
 
-struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player* newPlayer,struct playerQueue* Queue, int pipeRead)
+struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player* newPlayer, struct playerQueue* Queue, int pipeRead)
 {
     char buffer[BUFFSIZE];
     struct player* retPlayerPTR = 0;
@@ -424,7 +424,7 @@ struct player* TeamMemberRequest(int sockFD, struct referee* Ref, struct player*
 
     setBuff(buffer, "");
 
-    if(response == 1){
+    if(response == 1) {
         WaitFullTeams(sockFD, buffer, Ref);
     } else {
         pthread_exit(NULL);

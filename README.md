@@ -11,3 +11,4 @@ contains all components of both Client and Server, with custom libraries and Doc
 4. For the match to start, you have to connect 10 clients: 
     - 2 captains that define the Teams
     - 8 other clients that act as team members (4 each)
+5. Once the match is over, you can choose to play another match with the same players or close the application  
