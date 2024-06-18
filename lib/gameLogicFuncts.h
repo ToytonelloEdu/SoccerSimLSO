@@ -30,18 +30,16 @@ void Penalize(struct referee* Ref, char oppTeam, char* msg);
 void addShotFailed(struct stats* stats);
 void addDribbling(struct stats* stats);
 
-typedef int ball;
+typedef pthread_mutex_t ball;
 
     void wait(ball* mutex)
     {
-        while(*mutex <= 0);
-        
-        (*mutex)--;
+        pthread_mutex_lock(mutex);
     }
 
     void signal(ball* mutex)
     {        
-        (*mutex)++;
+        pthread_mutex_unlock(mutex);
     }
 
     int valInBetween(int bottom, int val, int top)
