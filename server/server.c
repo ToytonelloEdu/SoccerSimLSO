@@ -22,7 +22,7 @@
 #include "../lib/clientManagement.h"
 
 
-int S = 1;
+ball S = PTHREAD_MUTEX_INITIALIZER;
 struct referee Ref; int pipe_A[2]; int pipe_B[2];
 struct playerQueue QueueA = {0,0}, QueueB = {0,0};
 
